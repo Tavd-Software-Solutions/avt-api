@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "runtime": "nodejs18.x",
+      "source": "src/main.ts"
+    }
+  }
+}
