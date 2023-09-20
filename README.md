@@ -8,29 +8,23 @@ Avt Wallet API with [Nest](https://github.com/nestjs/nest) framework repository.
 
 ```bash
 * docker
-* node versão 16.14.0 ou superior
+* node versão 18.16.1 ou superior
 ```
 
 ## Comandos iniciais
 
 ```bash
 # normal
-$ npm install
+$ npm install -g yarn
+$ yarn
 $ docker volume create --name=api_avtwallet
 $ docker-compose up -d
-```
-
-Outra opção
-
-```bash
-# makefile (mac/linux)
-$ make install
 ```
 
 ## Rodando a API
 
 ```bash
-$ npm start
+$ yarn start:dev
 ```
 
 ## PgAdmin4
@@ -61,14 +55,6 @@ Abra um terminal na pasta "api" e digite o comando:
 
 ```bash
 * docker build --tag "api_avtwallet" .
-```
-
-Depois
-
-Abra um terminal na pasta "front-end" e digite o comando:
-
-```bash
-* docker build --tag "app_avtwallet" .
 ```
 
 Obs: importante validar se no arquivo docker-compose.yaml, no volume da api e do app, os atributos "image:"</br>
