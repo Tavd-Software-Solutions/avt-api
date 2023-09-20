@@ -1,0 +1,42 @@
+name: ApiPipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: ls -la
+
+      - name: Install dependencies
+        run: | 
+          npm install -g yarn
+          yarn install
+
+      - name: Validate ESlint
+        run: |
+          yarn lint --fix
+
+      - name: Format the code
+        run: |
+          yarn format
+
+      - name: Build
+        run: |
+          yarn build
