@@ -12,16 +12,14 @@ import {
   RecoverPasswordDTO,
   RecoverPasswordResponse,
 } from '../dto/recover-password';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
-  private logger = new Logger(User.name);
+  private logger = new Logger('User');
 
-  constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
   private resend = new Resend(process.env.RESEND_SECRET);
 
@@ -30,15 +28,19 @@ export class UserService {
       const { password } = createUserDto;
       const hashedPassword = await this.hashPassword(password);
 
-      createUserDto.password = hashedPassword;
+      const newUser = {
+        ...createUserDto,
+        password: hashedPassword,
+        recoverCode: null,
+      };
 
-      const user = this.usersRepository.create(createUserDto);
-
-      this.usersRepository.save(user);
+      const user = this.prisma.user.create({
+        data: newUser,
+      });
 
       this.logger.debug('User created successfully');
 
-      return { message: `User ${user.name} created successfully` };
+      return { message: `User ${newUser.name} created successfully` };
     } catch (e: any) {
       handleErrors(e.message, e.code);
     }
@@ -46,10 +48,10 @@ export class UserService {
 
   async findById(id: string): Promise<GetUserResponse> {
     try {
-      const user = await this.usersRepository.findOne({
+      const user = await this.prisma.user.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
       });
 
@@ -68,10 +70,10 @@ export class UserService {
 
   async findOne(id: string): Promise<User> {
     try {
-      const user = await this.usersRepository.findOne({
+      const user = await this.prisma.user.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
       });
 
@@ -85,7 +87,12 @@ export class UserService {
 
   async findByLogin(login: string): Promise<User> {
     try {
-      const user = await this.usersRepository.findOneBy({ login });
+      const user = await this.prisma.user.findUnique({
+        where: {
+          login,
+          deletedAt: null,
+        },
+      });
 
       if (!user) throw new HttpException('user_not_found', 404);
 
@@ -100,10 +107,10 @@ export class UserService {
     updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserResponse> {
     try {
-      const user = await this.usersRepository.findOne({
+      const user = await this.prisma.user.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
       });
 
@@ -115,7 +122,14 @@ export class UserService {
       user.password = updateUserDto.password;
       user.updatedAt = new Date();
 
-      await this.usersRepository.update(id, user);
+      await this.prisma.user.update({
+        where: {
+          id,
+        },
+        data: {
+          ...user,
+        },
+      });
 
       this.logger.debug('User updated successfully');
 
@@ -132,9 +146,13 @@ export class UserService {
 
   async softDelete(id: string): Promise<DeletedEntity> {
     try {
-      const user = await this.usersRepository.findOneBy({ id }).then((user) => {
-        user.deletedAt = new Date();
-        return this.usersRepository.save(user);
+      const user = await this.prisma.user.update({
+        where: {
+          id,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
       });
 
       return { message: `User ${user.name} deleted successfully` };
@@ -146,14 +164,12 @@ export class UserService {
   async getRecoverCode(email: string): Promise<void> {
     const recoverCode = this.generateCode();
 
-    const user = await this.usersRepository.findOne({
+    await this.prisma.user.findUniqueOrThrow({
       where: {
         email,
-        deletedAt: IsNull(),
+        deletedAt: null,
       },
     });
-
-    if (!user) throw new HttpException('user_not_found', 404);
 
     try {
       await this.resend.emails
@@ -162,7 +178,7 @@ export class UserService {
           to: [email],
           subject: 'Recuperar senha:',
           html: `
-            <h3>Este é o seu código para recuperação de senha:</h3>
+          <h3>Este é o seu código para recuperação de senha:</h3>
             <p>${recoverCode}</p>
           `,
         })
@@ -173,27 +189,42 @@ export class UserService {
           throw new HttpException('error_recover_password', 500);
         });
     } catch (e) {
+      if ((e.code = 'P2025')) {
+        throw new HttpException('user_not_found', 404);
+      }
       this.logger.error('Error durring sending email');
     }
 
-    user.recoverCode = recoverCode;
-    this.usersRepository.save(user);
+    await this.prisma.user.update({
+      where: {
+        email,
+      },
+      data: {
+        recoverCode,
+      },
+    });
   }
 
   async validateRecoverCode(
     recoverCode: string,
   ): Promise<ValidatedUserWithCodeDTO> {
-    const user = await this.usersRepository.findOne({
+    const user = await this.prisma.user.findUnique({
       where: {
         recoverCode,
-        deletedAt: IsNull(),
+        deletedAt: null,
       },
     });
 
     if (!user) throw new HttpException('user_not_found', 404);
 
-    user.recoverCode = null;
-    this.usersRepository.save(user);
+    await this.prisma.user.update({
+      where: {
+        recoverCode,
+      },
+      data: {
+        recoverCode: null,
+      },
+    });
 
     const payload = { username: user.login, sub: user.id, coin: user.coin };
 
@@ -211,10 +242,10 @@ export class UserService {
     const { newPassword } = recover;
     const userId = convertToken(request);
 
-    const user = await this.usersRepository.findOne({
+    const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
-        deletedAt: IsNull(),
+        deletedAt: null,
       },
     });
 
@@ -226,10 +257,14 @@ export class UserService {
       throw new HttpException('user_new_password_equal_old_password', 500);
     }
 
-    user.password = newHashedPassword;
-
-    await this.usersRepository.save(user);
-
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: newHashedPassword,
+      },
+    });
     return {
       message: 'Password updated successfully',
     };
