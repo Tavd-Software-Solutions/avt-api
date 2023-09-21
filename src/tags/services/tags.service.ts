@@ -8,22 +8,23 @@ import {
   DeletedEntity,
   UpdatedEntity,
 } from 'src/common/dto/default-responses';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Tag } from '@prisma/client';
 
 @Injectable()
 export class TagsService {
-  private logger = new Logger(Tag.name);
+  private logger = new Logger('Tag');
 
   constructor(
-    @InjectRepository(Tag)
-    private tagRepository: Repository<Tag>,
+    private prisma: PrismaService,
     private userService: UserService,
   ) {}
 
   async create(createTagDto: CreateTagDto): Promise<CreatedEntity> {
-    if (createTagDto.name === '' || !createTagDto.name)
-      throw new HttpException('Tag is empty', 404);
-    if (createTagDto.userId === '' || !createTagDto.userId)
-      throw new HttpException('User is empty', 404);
+    const { name, userId } = createTagDto;
+
+    if (name === '' || !name) throw new HttpException('Tag is empty', 404);
+    if (userId === '' || !userId) throw new HttpException('User is empty', 404);
 
     try {
       const { userId } = createTagDto;
@@ -31,14 +32,14 @@ export class TagsService {
 
       if (!user) throw new HttpException('user_not_found', 404);
 
-      const newTag = new Tag();
-      newTag.name = createTagDto.name;
-      newTag.user = user;
-
-      const tag = this.tagRepository.create(newTag);
+      const tag = await this.prisma.tag.create({
+        data: {
+          name,
+          userId,
+        },
+      });
 
       this.logger.log('Created successfully');
-      this.tagRepository.save(tag);
 
       return { message: `Tag ${tag.name} created successfully` };
     } catch (e: any) {
@@ -49,13 +50,13 @@ export class TagsService {
   async findAll(context: any): Promise<Tag[]> {
     try {
       const userId = convertToken(context);
-      const query = this.tagRepository
-        .createQueryBuilder('tag')
-        .where('tag.deletedAt IS NULL')
-        .andWhere('(tag.userId = :userId OR tag.userId IS NULL)', {
-          userId,
-        });
-      return query.getMany();
+      const tags = await this.prisma.tag.findMany({
+        where: {
+          deletedAt: null,
+        },
+      });
+
+      return tags;
     } catch (e: any) {
       handleErrors(e.message, e.code);
     }
@@ -63,10 +64,10 @@ export class TagsService {
 
   async findOne(id: string): Promise<Tag> {
     try {
-      const tag = await this.tagRepository.findOne({
+      const tag = await this.prisma.tag.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
       });
 
@@ -80,20 +81,28 @@ export class TagsService {
 
   async update(id: string, updateTagDto: UpdateTagDto): Promise<UpdatedEntity> {
     try {
-      const tag = await this.tagRepository.findOne({
+      const { name } = updateTagDto;
+
+      const tag = await this.prisma.tag.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
       });
 
       if (!tag) throw new HttpException('Tag not found', 404);
 
-      tag.name = updateTagDto.name;
-      tag.updatedAt = new Date();
+      await this.prisma.tag.update({
+        where: {
+          id,
+        },
+        data: {
+          name: updateTagDto.name,
+          updatedAt: new Date(),
+        },
+      });
 
-      await this.tagRepository.update(id, tag);
-      return { message: `Tag ${updateTagDto.name} updated successfully` };
+      return { message: `Tag ${name} updated successfully` };
     } catch (e: any) {
       handleErrors(e.message, e.code);
     }
@@ -102,12 +111,16 @@ export class TagsService {
   async softDelete(id: string, context: any): Promise<DeletedEntity> {
     try {
       const userId = convertToken(context);
-      const tag = await this.tagRepository
-        .findOne({ where: { id: id, user: { id: userId } } })
-        .then((tag) => {
-          tag.deletedAt = new Date();
-          return this.tagRepository.save(tag);
-        });
+
+      const tag = await this.prisma.tag.update({
+        where: {
+          id,
+          userId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
 
       return { message: `Tag ${tag.name} deleted successfully` };
     } catch (e) {
