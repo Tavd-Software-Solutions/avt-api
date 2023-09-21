@@ -14,7 +14,6 @@ Avt Wallet API with [Nest](https://github.com/nestjs/nest) framework repository.
 ## Comandos iniciais
 
 ```bash
-# normal
 $ npm install -g yarn
 $ yarn
 $ docker-compose up -d
@@ -24,6 +23,32 @@ $ docker-compose up -d
 
 ```bash
 $ yarn start:dev
+```
+
+## Database
+
+Acessar o banco via navegador
+
+```bash
+$ prisma studio
+```
+
+Criar migration
+
+```bash
+$ npx prisma migrate dev
+```
+
+Atualizar o schema do Prisma com base no banco de dados
+
+```bash
+$ prisma db pull
+```
+
+Enviar o schema do Prisma para o banco de dados
+
+```bash
+$ prisma db push
 ```
 
 ## Docker
