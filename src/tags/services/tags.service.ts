@@ -1,9 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
-import { Tag } from '../entities/tag.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
 import { convertToken, handleErrors } from 'src/common/services/common.service';
 import { UserService } from 'src/users/services/users.service';
 import {

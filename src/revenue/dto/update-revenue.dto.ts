@@ -1,5 +1,4 @@
-import { PayMethod } from '../enum/payMethod';
-import { typeRevenue } from '../enum/typeRevenue';
+import { PayMethod, TypeRevenue } from './enums';
 
 export class UpdateRevenueDto {
   name: string;
@@ -10,6 +9,6 @@ export class UpdateRevenueDto {
   payMethod: PayMethod;
   date: Date;
   description: string;
-  typeRevenue: typeRevenue;
+  typeRevenue: TypeRevenue;
   userId: string;
 }

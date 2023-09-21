@@ -1,9 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto, UpdateUserResponse } from '../dto/update-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
 import { CreatedEntity, DeletedEntity } from 'src/common/dto/default-responses';
 import { convertToken, handleErrors } from 'src/common/services/common.service';
 import { GetUserResponse } from '../dto/get-user.dto';

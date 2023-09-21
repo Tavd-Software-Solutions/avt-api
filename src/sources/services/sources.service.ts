@@ -1,9 +1,6 @@
 import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { CreateSourceDto } from '../dto/create-source.dto';
 import { UpdateSourceDto } from '../dto/update-source.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Source } from '../entities/source.entity';
-import { IsNull, Repository } from 'typeorm';
 import { DeletedEntity, UpdatedEntity } from 'src/common/dto/default-responses';
 import {
   convertToken,

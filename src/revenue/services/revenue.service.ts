@@ -1,9 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateRevenueDto } from '../dto/create-revenue.dto';
 import { UpdateRevenueDto } from '../dto/update-revenue.dto';
-import { Revenue } from '../entities/revenue.entity';
-import { IsNull, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { convertToken, handleErrors } from 'src/common/services/common.service';
 import {
   PageDto,
@@ -14,7 +11,6 @@ import {
 import { TagsService } from 'src/tags/services/tags.service';
 import { SourcesService } from 'src/sources/services/sources.service';
 import { UserService } from 'src/users/services/users.service';
-import { typeRevenue } from '../enum/typeRevenue';
 import {
   CreatedEntity,
   DeletedEntity,
@@ -25,6 +21,7 @@ import {
   IPieChart,
   IStackedChart,
 } from '../dto/charts-interface.dto';
+import { TypeRevenue } from '../dto/enums';
 
 @Injectable()
 export class RevenueService {
@@ -198,10 +195,10 @@ export class RevenueService {
 
       const amount = entities.reduce((amount: number, entity: Revenue) => {
         let value = 0;
-        if (entity.typeRevenue === typeRevenue.EXPENSE) {
+        if (entity.typeRevenue === TypeRevenue.EXPENSE) {
           value = amount - Number(entity.value);
         }
-        if (entity.typeRevenue === typeRevenue.INCOMING) {
+        if (entity.typeRevenue === TypeRevenue.INCOMING) {
           value = amount + Number(entity.value);
         }
         return value;
@@ -227,7 +224,7 @@ export class RevenueService {
 
       const totalExpenses = entities.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             return total + Number(entity.value);
           }
           return total;
@@ -237,7 +234,7 @@ export class RevenueService {
 
       const totalIncomings = entities.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             return total + Number(entity.value);
           }
           return total;
@@ -291,7 +288,7 @@ export class RevenueService {
       );
       const listExpenses = entities.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -301,7 +298,7 @@ export class RevenueService {
 
       const listIncomings = entities.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -347,10 +344,10 @@ export class RevenueService {
 
       const listRevenues = entities.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             accumulator.push(Number(entity.value) * -1);
           }
-          if (entity.typeRevenue === typeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
