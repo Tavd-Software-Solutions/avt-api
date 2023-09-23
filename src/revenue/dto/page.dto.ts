@@ -1,16 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Order } from '../enum/order';
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PayMethod } from '../enum/payMethod';
-import { typeRevenue } from '../enum/typeRevenue';
+import { PayMethod, TypeRevenue } from '@prisma/client';
+
+enum Order {
+  ASC = 'asc',
+  DESC = 'desc',
+}
 
 export interface WhereDto {
   name?: string;
   value?: number;
   tagId?: string;
   payMethod?: PayMethod;
-  typeRevenue?: typeRevenue;
+  typeRevenue?: TypeRevenue;
   startDate?: Date;
   endDate?: Date;
 }

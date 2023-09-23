@@ -35,5 +35,5 @@ export class CreateUserDto {
   })
   @IsString()
   @IsNotEmpty()
-  coin: string
+  coin: string;
 }

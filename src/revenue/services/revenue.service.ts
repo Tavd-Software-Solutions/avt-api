@@ -1,9 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateRevenueDto } from '../dto/create-revenue.dto';
 import { UpdateRevenueDto } from '../dto/update-revenue.dto';
-import { Revenue } from '../entities/revenue.entity';
-import { IsNull, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { convertToken, handleErrors } from 'src/common/services/common.service';
 import {
   PageDto,
@@ -14,7 +11,6 @@ import {
 import { TagsService } from 'src/tags/services/tags.service';
 import { SourcesService } from 'src/sources/services/sources.service';
 import { UserService } from 'src/users/services/users.service';
-import { typeRevenue } from '../enum/typeRevenue';
 import {
   CreatedEntity,
   DeletedEntity,
@@ -25,14 +21,16 @@ import {
   IPieChart,
   IStackedChart,
 } from '../dto/charts-interface.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Revenue, TypeRevenue } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class RevenueService {
-  private logger = new Logger(Revenue.name);
+  private logger = new Logger('Revenue');
 
   constructor(
-    @InjectRepository(Revenue)
-    private revenueRepository: Repository<Revenue>,
+    private prisma: PrismaService,
     private userService: UserService,
     private sourceService: SourcesService,
     private tagService: TagsService,
@@ -53,21 +51,22 @@ export class RevenueService {
 
     if (!tag) throw new HttpException('tag_not_found', 404);
 
-    const newRevenue = new Revenue();
-
-    newRevenue.name = createRevenueDto.name;
-    newRevenue.coin = createRevenueDto.coin;
-    newRevenue.value = createRevenueDto.value;
-    newRevenue.source = source;
-    newRevenue.tag = tag;
-    newRevenue.payMethod = createRevenueDto.payMethod;
-    newRevenue.description = createRevenueDto.description;
-    newRevenue.typeRevenue = createRevenueDto.typeRevenue;
-    newRevenue.user = user;
-    newRevenue.date = new Date(createRevenueDto.date);
-
     try {
-      await this.revenueRepository.save(newRevenue);
+      await this.prisma.revenue.create({
+        data: {
+          name: createRevenueDto.name,
+          coin: createRevenueDto.coin,
+          value: createRevenueDto.value,
+          sourceId: sourceId,
+          tagId: tagId,
+          payMethod: createRevenueDto.payMethod,
+          description: createRevenueDto.description,
+          typeRevenue: createRevenueDto.typeRevenue,
+          userId: userId,
+          date: new Date(createRevenueDto.date),
+        },
+      });
+
       this.logger.log('Revenue created successfully');
 
       return {
@@ -84,24 +83,30 @@ export class RevenueService {
   ): Promise<PageDto<Revenue>> {
     try {
       const { order, skip, take, where } = pageOptionsDto;
-      const queryBuilder = this.revenueRepository.createQueryBuilder('revenue');
       const userId = convertToken(context);
-      const { whereString, values } = this.buildWhere(where);
 
-      queryBuilder
-        .orderBy('revenue.createdAt', order)
-        .skip(skip)
-        .take(take)
-        .leftJoinAndSelect('revenue.tag', 'tag')
-        .where(whereString, values)
-        .andWhere('revenue.userId = :user', { user: userId });
+      const revenues = await this.prisma.revenue.findMany({
+        where: {
+          ...where,
+          AND: {
+            userId,
+          },
+        },
+        skip,
+        take,
+        include: {
+          tag: true,
+        },
+        orderBy: {
+          createdAt: order,
+        },
+      });
 
-      const itemCount = await queryBuilder.getCount();
-      const { entities } = await queryBuilder.getRawAndEntities();
+      const itemCount = revenues.length;
 
       const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
 
-      return new PageDto(entities, pageMetaDto);
+      return new PageDto(revenues, pageMetaDto);
     } catch (e: any) {
       handleErrors(e.message, e.code);
     }
@@ -109,12 +114,15 @@ export class RevenueService {
 
   async findOne(id: string): Promise<Revenue> {
     try {
-      const revenue = await this.revenueRepository.findOne({
+      const revenue = await this.prisma.revenue.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
-        relations: ['tag', 'source'],
+        include: {
+          tag: true,
+          source: true,
+        },
       });
 
       if (!revenue) throw new HttpException('Revenue not found', 404);
@@ -132,10 +140,10 @@ export class RevenueService {
     const { sourceId, tagId } = updateRevenueDto;
 
     try {
-      const revenue = await this.revenueRepository.findOne({
+      const revenue = await this.prisma.revenue.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
       });
 
@@ -149,18 +157,24 @@ export class RevenueService {
 
       if (!tag) throw new HttpException('tag_not_found', 404);
 
-      revenue.name = updateRevenueDto.name;
-      revenue.coin = updateRevenueDto.coin;
-      revenue.value = updateRevenueDto.value;
-      revenue.payMethod = updateRevenueDto.payMethod;
-      revenue.date = updateRevenueDto.date;
-      revenue.description = updateRevenueDto.description;
-      revenue.typeRevenue = updateRevenueDto.typeRevenue;
-      revenue.source = source;
-      revenue.tag = tag;
-      revenue.updatedAt = new Date();
+      await this.prisma.revenue.update({
+        where: {
+          id,
+        },
+        data: {
+          name: updateRevenueDto.name,
+          coin: updateRevenueDto.coin,
+          value: new Decimal(updateRevenueDto.value),
+          payMethod: updateRevenueDto.payMethod,
+          date: updateRevenueDto.date,
+          description: updateRevenueDto.description,
+          typeRevenue: updateRevenueDto.typeRevenue,
+          sourceId: source.id,
+          tagId: tag.id,
+          updatedAt: new Date(),
+        },
+      });
 
-      await this.revenueRepository.update(id, revenue);
       return {
         message: `Revenue ${updateRevenueDto.name} updated successfully`,
       };
@@ -169,14 +183,29 @@ export class RevenueService {
     }
   }
 
-  async softDelete(id: string): Promise<DeletedEntity> {
+  async softDelete(id: string, context: any): Promise<DeletedEntity> {
     try {
-      const revenue = await this.revenueRepository
-        .findOneBy({ id })
-        .then((revenue) => {
-          revenue.deletedAt = new Date();
-          return this.revenueRepository.save(revenue);
-        });
+      const userId = convertToken(context);
+
+      const revenue = await this.prisma.revenue.findUnique({
+        where: {
+          id,
+          userId,
+          deletedAt: null,
+        },
+      });
+
+      if (!revenue) throw new HttpException('Revenue not found', 404);
+
+      await this.prisma.revenue.update({
+        where: {
+          id,
+          userId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
 
       return {
         message: `Revenue ${revenue.name} deleted successfully`,
@@ -188,20 +217,21 @@ export class RevenueService {
 
   async getAmount(context: any): Promise<number> {
     try {
-      const queryBuilder = this.revenueRepository.createQueryBuilder('revenue');
       const userId = convertToken(context);
-      queryBuilder
-        .where('revenue.deletedAt is null')
-        .andWhere('revenue.userId = :user', { user: userId });
 
-      const { entities } = await queryBuilder.getRawAndEntities();
+      const revenues = await this.prisma.revenue.findMany({
+        where: {
+          userId,
+          deletedAt: null,
+        },
+      });
 
-      const amount = entities.reduce((amount: number, entity: Revenue) => {
+      const amount = revenues.reduce((amount: number, entity: Revenue) => {
         let value = 0;
-        if (entity.typeRevenue === typeRevenue.EXPENSE) {
+        if (entity.typeRevenue === TypeRevenue.EXPENSE) {
           value = amount - Number(entity.value);
         }
-        if (entity.typeRevenue === typeRevenue.INCOMING) {
+        if (entity.typeRevenue === TypeRevenue.INCOMING) {
           value = amount + Number(entity.value);
         }
         return value;
@@ -216,18 +246,17 @@ export class RevenueService {
   async getPieChart(context: any): Promise<IPieChart> {
     try {
       const userId = convertToken(context);
-      const query = this.revenueRepository
-        .createQueryBuilder('revenue')
-        .where('revenue.deletedAt IS NULL')
-        .andWhere('revenue.userId = :userId ', {
+
+      const revenues = await this.prisma.revenue.findMany({
+        where: {
           userId,
-        });
+          deletedAt: null,
+        },
+      });
 
-      const { entities } = await query.getRawAndEntities();
-
-      const totalExpenses = entities.reduce(
+      const totalExpenses = revenues.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             return total + Number(entity.value);
           }
           return total;
@@ -235,9 +264,9 @@ export class RevenueService {
         0,
       );
 
-      const totalIncomings = entities.reduce(
+      const totalIncomings = revenues.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             return total + Number(entity.value);
           }
           return total;
@@ -266,20 +295,18 @@ export class RevenueService {
         0,
       );
 
-      const query = this.revenueRepository
-        .createQueryBuilder('revenue')
-        .where('revenue.deletedAt IS NULL')
-        .andWhere('revenue.userId = :userId ', {
+      const revenues = await this.prisma.revenue.findMany({
+        where: {
           userId,
-        })
-        .andWhere('revenue.date BETWEEN :startDate AND :endDate', {
-          startDate: firstDayOfMonth,
-          endDate: lastDayOfMonth,
-        });
+          deletedAt: null,
+          date: {
+            gte: firstDayOfMonth,
+            lte: lastDayOfMonth,
+          },
+        },
+      });
 
-      const { entities } = await query.getRawAndEntities();
-
-      const sortedDates = entities
+      const sortedDates = revenues
         .map((entity) => entity.date)
         .sort((a, b) => {
           const dateA = new Date(a);
@@ -289,9 +316,9 @@ export class RevenueService {
       const listDates = Array.from(
         new Set(sortedDates.map((date) => this.formatDate(date))),
       );
-      const listExpenses = entities.reduce(
+      const listExpenses = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -299,9 +326,9 @@ export class RevenueService {
         [],
       );
 
-      const listIncomings = entities.reduce(
+      const listIncomings = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -324,19 +351,20 @@ export class RevenueService {
   ): Promise<IBarChart> {
     try {
       const where = pageOptionsDto;
-      const queryBuilder = this.revenueRepository.createQueryBuilder('revenue');
       const userId = convertToken(context);
-      const { whereString, values } = this.buildWhere(where);
 
-      queryBuilder
-        .orderBy('revenue.createdAt', 'ASC')
-        .leftJoinAndSelect('revenue.tag', 'tag')
-        .where(whereString, values)
-        .andWhere('revenue.userId = :user', { user: userId });
+      const revenues = await this.prisma.revenue.findMany({
+        where: {
+          ...where,
+          userId,
+          deletedAt: null,
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      });
 
-      const { entities } = await queryBuilder.getRawAndEntities();
-
-      const listDates = entities
+      const listDates = revenues
         .map((entity) => entity.date)
         .sort((a, b) => {
           const dateA = new Date(a);
@@ -345,12 +373,12 @@ export class RevenueService {
         })
         .map((date) => this.formatDate(date));
 
-      const listRevenues = entities.reduce(
+      const listRevenues = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === typeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             accumulator.push(Number(entity.value) * -1);
           }
-          if (entity.typeRevenue === typeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -464,6 +492,7 @@ export class RevenueService {
       values,
     };
   }
+
   private formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
