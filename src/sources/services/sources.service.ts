@@ -7,39 +7,39 @@ import {
   handleErrors,
 } from '../../common/services/common.service';
 import { UserService } from 'src/users/services/users.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Source } from '@prisma/client';
 
 @Injectable()
 export class SourcesService {
-  private logger = new Logger(Source.name);
+  private logger = new Logger('Source');
 
   constructor(
-    @InjectRepository(Source)
-    private sourceRepository: Repository<Source>,
+    private prisma: PrismaService,
     private userService: UserService,
   ) {}
 
   async create(createSourceDto: CreateSourceDto) {
-    if (createSourceDto.name === '' || !createSourceDto.name)
-      throw new HttpException('Tag is empty', 404);
-    if (createSourceDto.userId === '' || !createSourceDto.userId)
-      throw new HttpException('User is empty', 404);
+    const { name, userId } = createSourceDto;
+
+    if (name === '' || !name) throw new HttpException('Tag is empty', 404);
+    if (userId === '' || !userId) throw new HttpException('User is empty', 404);
 
     try {
-      const { userId } = createSourceDto;
       const user = await this.userService.findOne(userId);
 
       if (!user) throw new HttpException('user_not_found', 404);
 
-      const newSource = new Source();
-      newSource.name = createSourceDto.name;
-      newSource.user = user;
-
-      const source = this.sourceRepository.create(newSource);
+      await this.prisma.source.create({
+        data: {
+          name,
+          userId,
+        },
+      });
 
       this.logger.log('Source created successfully');
-      this.sourceRepository.save(source);
 
-      return { message: `Source ${source.name} created successfully` };
+      return { message: `Source ${name} created successfully` };
     } catch (e: any) {
       handleErrors(e.message, e.code);
     }
@@ -48,13 +48,16 @@ export class SourcesService {
   async findAll(context: any): Promise<Source[]> {
     try {
       const userId = convertToken(context);
-      const query = this.sourceRepository
-        .createQueryBuilder('source')
-        .where('source.deletedAt IS NULL')
-        .andWhere('(source.userId = :userId OR source.userId IS NULL)', {
+
+      const sources = await this.prisma.source.findMany({
+        where: {
+          deletedAt: null,
           userId,
-        });
-      return query.getMany();
+          OR: [{ deletedAt: null }, { userId: null }],
+        },
+      });
+
+      return sources;
     } catch (e: any) {
       handleErrors(e.message, e.code);
     }
@@ -62,10 +65,10 @@ export class SourcesService {
 
   async findOne(id: string): Promise<Source> {
     try {
-      const source = await this.sourceRepository.findOne({
+      const source = await this.prisma.source.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
       });
 
@@ -82,19 +85,24 @@ export class SourcesService {
     updateSourceDto: UpdateSourceDto,
   ): Promise<UpdatedEntity> {
     try {
-      const source = await this.sourceRepository.findOne({
+      const source = await this.prisma.source.findUnique({
         where: {
           id,
-          deletedAt: IsNull(),
+          deletedAt: null,
         },
       });
 
       if (!source) throw new HttpException('Source not found', 404);
 
-      source.name = updateSourceDto.name;
-      source.updatedAt = new Date();
-
-      await this.sourceRepository.update(id, source);
+      await this.prisma.source.update({
+        where: {
+          id,
+        },
+        data: {
+          name: updateSourceDto.name,
+          updatedAt: new Date(),
+        },
+      });
 
       return { message: `Source ${source.name} updated successfully` };
     } catch (e: any) {
@@ -105,12 +113,26 @@ export class SourcesService {
   async softDelete(id: string, context: any): Promise<DeletedEntity> {
     try {
       const userId = convertToken(context);
-      const source = await this.sourceRepository
-        .findOne({ where: { id: id, user: { id: userId } } })
-        .then((source) => {
-          source.deletedAt = new Date();
-          return this.sourceRepository.save(source);
-        });
+
+      const source = await this.prisma.source.findUnique({
+        where: {
+          id,
+          userId,
+          deletedAt: null,
+        },
+      });
+
+      if (!source) throw new HttpException('Source not found', 404);
+
+      await this.prisma.source.update({
+        where: {
+          id,
+          userId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
 
       return { message: `Source ${source.name} deleted successfully` };
     } catch (e) {
