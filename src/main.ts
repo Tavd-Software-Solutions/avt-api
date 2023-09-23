@@ -2,11 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { Connection } from 'typeorm';
-import { config } from 'dotenv';
-import Seeder from './database/seeds/default-seeder.seeder';
-config();
-
 import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
@@ -39,11 +34,6 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   app.enableCors({ origin: 'http://localhost:3000' });
-
-  //Seeder
-  const connection = app.get(Connection);
-  await connection.synchronize();
-  await Seeder.run(connection);
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 

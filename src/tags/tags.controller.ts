@@ -17,7 +17,7 @@ import {
   DeletedEntity,
   UpdatedEntity,
 } from 'src/common/dto/default-responses';
-import { Tag } from './entities/tag.entity';
+import { Tag } from '@prisma/client';
 
 @ApiTags('tags')
 @Controller('tags')
@@ -31,13 +31,13 @@ export class TagsController {
   }
 
   @Get('list-all')
-  @ApiResponse({ status: 200, type: [Tag] })
+  @ApiResponse({ status: 200 })
   findAll(@Request() request: any): Promise<Tag[]> {
     return this.tagsService.findAll(request);
   }
 
   @Get('get/:id')
-  @ApiResponse({ status: 200, type: Tag })
+  @ApiResponse({ status: 200 })
   findOne(@Param('id') id: string): Promise<Tag> {
     return this.tagsService.findOne(id);
   }

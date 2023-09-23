@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { PayMethod } from '../enum/payMethod';
-import { typeRevenue } from '../enum/typeRevenue';
+import { PayMethod, TypeRevenue } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateRevenueDto {
@@ -57,11 +56,11 @@ export class CreateRevenueDto {
   description: string;
 
   @ApiProperty({
-    example: typeRevenue.EXPENSE,
+    example: TypeRevenue.EXPENSE,
   })
-  @IsEnum(typeRevenue)
+  @IsEnum(TypeRevenue)
   @IsNotEmpty()
-  typeRevenue: typeRevenue;
+  typeRevenue: TypeRevenue;
 
   @ApiProperty({
     example: 'b4d02f14-2cf9-4ce1-9fa7-c94b07cd9e75',

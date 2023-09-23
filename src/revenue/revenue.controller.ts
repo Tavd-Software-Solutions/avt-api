@@ -13,7 +13,6 @@ import { CreateRevenueDto } from './dto/create-revenue.dto';
 import { UpdateRevenueDto } from './dto/update-revenue.dto';
 import { PageDto, PageOptionsDto, WhereDto } from './dto/page.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Revenue } from './entities/revenue.entity';
 import {
   CreatedEntity,
   DeletedEntity,
@@ -24,6 +23,7 @@ import {
   IPieChart,
   IStackedChart,
 } from './dto/charts-interface.dto';
+import { Revenue } from '@prisma/client';
 @ApiTags('revenues')
 @Controller('revenues')
 export class RevenueController {
@@ -45,7 +45,7 @@ export class RevenueController {
   }
 
   @Get('get/:id')
-  @ApiResponse({ status: 200, type: Revenue })
+  @ApiResponse({ status: 200 })
   findOne(@Param('id') id: string): Promise<Revenue> {
     return this.revenueService.findOne(id);
   }
@@ -88,7 +88,10 @@ export class RevenueController {
 
   @Delete('delete/:id')
   @ApiResponse({ status: 200, type: DeletedEntity })
-  remove(@Param('id') id: string): Promise<DeletedEntity> {
-    return this.revenueService.softDelete(id);
+  remove(
+    @Param('id') id: string,
+    @Request() request: any,
+  ): Promise<DeletedEntity> {
+    return this.revenueService.softDelete(id, request);
   }
 }
