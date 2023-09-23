@@ -11,12 +11,36 @@ Avt Wallet API with [Nest](https://github.com/nestjs/nest) framework repository.
 * node versão 18.16.1 ou superior
 ```
 
-## Comandos iniciais
+## Primeiros passos
+
+Instalar o yarn
 
 ```bash
 $ npm install -g yarn
+```
+
+Instalar as dependências do projeto
+
+```bash
 $ yarn
-$ docker-compose up -d
+```
+
+Criar o arquivo .env do projeto
+
+```bash
+$ cp .env.example .env
+```
+
+Rodar o banco de dados localmente com o docker compose
+
+```bash
+$ docker compose up db -d
+```
+
+Atualizar o banco de dados de acordo com o prisma
+
+```bash
+$ npx prisma db push
 ```
 
 ## Rodando a API
