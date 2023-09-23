@@ -22,7 +22,7 @@ export class SourcesService {
   async create(createSourceDto: CreateSourceDto) {
     const { name, userId } = createSourceDto;
 
-    if (name === '' || !name) throw new HttpException('Tag is empty', 404);
+    if (name === '' || !name) throw new HttpException('Source is empty', 404);
     if (userId === '' || !userId) throw new HttpException('User is empty', 404);
 
     try {

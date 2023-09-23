@@ -34,7 +34,7 @@ export class UserService {
         recoverCode: null,
       };
 
-      const user = this.prisma.user.create({
+      const user = await this.prisma.user.create({
         data: newUser,
       });
 

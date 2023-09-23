@@ -5,7 +5,7 @@ const logger = new Logger();
 const prisma = new PrismaClient();
 
 async function main() {
-  const user = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: {
       email: 'John Doe',
     },
@@ -26,7 +26,6 @@ main()
     logger.error('Prisma connection error', e);
     process.exit(1);
   })
-
   .finally(async () => {
     await prisma.$disconnect();
   });
