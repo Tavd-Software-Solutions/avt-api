@@ -12,8 +12,8 @@ import { SourcesService } from './services/sources.service';
 import { CreateSourceDto } from './dto/create-source.dto';
 import { UpdateSourceDto } from './dto/update-source.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Source } from './entities/source.entity';
 import { DeletedEntity, UpdatedEntity } from 'src/common/dto/default-responses';
+import { Source } from '@prisma/client';
 
 @ApiTags('sources')
 @Controller('sources')
@@ -27,13 +27,13 @@ export class SourcesController {
   }
 
   @Get('list-all')
-  @ApiResponse({ status: 200, type: [Source] })
+  @ApiResponse({ status: 200 })
   findAll(@Request() request: any): Promise<Source[]> {
     return this.sourcesService.findAll(request);
   }
 
   @Get('get/:id')
-  @ApiResponse({ status: 200, type: Source })
+  @ApiResponse({ status: 200 })
   findOne(@Param('id') id: string): Promise<Source> {
     return this.sourcesService.findOne(id);
   }
