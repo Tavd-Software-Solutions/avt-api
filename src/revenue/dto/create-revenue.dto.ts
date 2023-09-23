@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PayMethod, TypeRevenue } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { PayMethod, TypeRevenue } from './enums';
 
 export class CreateRevenueDto {
   @ApiProperty({

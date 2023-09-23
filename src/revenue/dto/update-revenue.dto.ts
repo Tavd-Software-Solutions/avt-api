@@ -1,4 +1,4 @@
-import { PayMethod, TypeRevenue } from './enums';
+import { PayMethod, TypeRevenue } from '@prisma/client';
 
 export class UpdateRevenueDto {
   name: string;
