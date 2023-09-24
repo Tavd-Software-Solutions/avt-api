@@ -13,14 +13,16 @@ async function bootstrap() {
       APP_ENV === 'dev' ? ['error', 'warn', 'debug', 'log'] : ['error', 'warn'],
   });
 
-  const config = new DocumentBuilder()
-    .setTitle('Avt Wallet API')
-    .setDescription('The avt wallet API description')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  if (APP_ENV === 'dev') {
+    const config = new DocumentBuilder()
+      .setTitle('Avt Wallet API')
+      .setDescription('The avt wallet API description')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   app.enableCors({ origin: 'http://localhost:3000' });
 
