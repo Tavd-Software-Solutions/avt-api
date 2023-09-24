@@ -7,6 +7,7 @@ import { RevenueModule } from '../revenue/revenue.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
+import { AppService } from './services/app.service';
 
 @Module({
   imports: [
@@ -20,6 +21,6 @@ import { AppController } from './app.controller';
     RevenueModule,
     PrismaModule,
   ],
-  providers: [AppController],
+  providers: [AppController, AppService],
 })
 export class AppModule {}
