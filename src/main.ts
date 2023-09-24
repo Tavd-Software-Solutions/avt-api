@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const logger = new Logger();
@@ -13,7 +14,17 @@ async function bootstrap() {
       APP_ENV === 'dev' ? ['error', 'warn', 'debug', 'log'] : ['error', 'warn'],
   });
 
-  app.use(['/docs', '/docs-json']);
+  if (APP_ENV === 'dev') {
+    app.use(
+      ['/docs', '/docs-json'],
+      basicAuth({
+        users: {
+          root: 'root',
+        },
+        challenge: true,
+      }),
+    );
+  }
 
   const config = new DocumentBuilder()
     .setTitle('Avt Wallet API')
