@@ -13,7 +13,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto, UpdateUserResponse } from './dto/update-user.dto';
 import { Public } from 'src/auth/decorators/auth.decorators';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreatedEntity, DeletedEntity } from 'src/common/dto/default-responses';
 import { GetUserResponse } from './dto/get-user.dto';
 import { GetRecoverCodeDTO } from './dto/get-recover-code.dto';
 import {
@@ -32,8 +31,8 @@ export class UsersController {
 
   @Public()
   @Post('create')
-  @ApiResponse({ status: 201, type: CreatedEntity })
-  async create(@Body() createUserDto: CreateUserDto): Promise<CreatedEntity> {
+  @ApiResponse({ status: 201 })
+  async create(@Body() createUserDto: CreateUserDto): Promise<any> {
     return await this.usersService.create(createUserDto);
   }
 
@@ -53,8 +52,8 @@ export class UsersController {
   }
 
   @Delete('delete/:id')
-  @ApiResponse({ status: 200, type: DeletedEntity })
-  async delete(@Param('id') id: string): Promise<DeletedEntity> {
+  @ApiResponse({ status: 200 })
+  async delete(@Param('id') id: string): Promise<any> {
     return await this.usersService.softDelete(id);
   }
 

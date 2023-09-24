@@ -1,7 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto, UpdateUserResponse } from '../dto/update-user.dto';
-import { CreatedEntity, DeletedEntity } from 'src/common/dto/default-responses';
 import { convertToken, handleErrors } from 'src/common/services/common.service';
 import { GetUserResponse } from '../dto/get-user.dto';
 import { Resend } from 'resend';
@@ -22,7 +21,7 @@ export class UserService {
 
   private resend = new Resend(process.env.RESEND_SECRET);
 
-  async create(createUserDto: CreateUserDto): Promise<CreatedEntity> {
+  async create(createUserDto: CreateUserDto): Promise<any> {
     try {
       const { password } = createUserDto;
       const hashedPassword = await this.hashPassword(password);
@@ -143,7 +142,7 @@ export class UserService {
     }
   }
 
-  async softDelete(id: string): Promise<DeletedEntity> {
+  async softDelete(id: string): Promise<any> {
     try {
       const user = await this.prisma.user.update({
         where: {

@@ -12,7 +12,6 @@ import { SourcesService } from './services/sources.service';
 import { CreateSourceDto } from './dto/create-source.dto';
 import { UpdateSourceDto } from './dto/update-source.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { DeletedEntity, UpdatedEntity } from 'src/common/dto/default-responses';
 import { Source } from '@prisma/client';
 
 @ApiTags('sources')
@@ -39,20 +38,20 @@ export class SourcesController {
   }
 
   @Put('edit/:id')
-  @ApiResponse({ status: 200, type: UpdatedEntity })
+  @ApiResponse({ status: 200 })
   update(
     @Param('id') id: string,
     @Body() updateSourceDto: UpdateSourceDto,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     return this.sourcesService.update(id, updateSourceDto);
   }
 
   @Delete('delete/:id')
-  @ApiResponse({ status: 200, type: DeletedEntity })
+  @ApiResponse({ status: 200 })
   remove(
     @Param('id') id: string,
     @Request() request: any,
-  ): Promise<DeletedEntity> {
+  ): Promise<any> {
     return this.sourcesService.softDelete(id, request);
   }
 }
