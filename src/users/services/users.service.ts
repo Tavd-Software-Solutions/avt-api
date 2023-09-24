@@ -4,7 +4,6 @@ import { UpdateUserDto, UpdateUserResponse } from '../dto/update-user.dto';
 import { CreatedEntity, DeletedEntity } from 'src/common/dto/default-responses';
 import { convertToken, handleErrors } from 'src/common/services/common.service';
 import { GetUserResponse } from '../dto/get-user.dto';
-import { compare, hash } from 'bcrypt';
 import { Resend } from 'resend';
 import { ValidatedUserWithCodeDTO } from '../dto/validate-recover-code';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +13,7 @@ import {
 } from '../dto/recover-password';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
+import { compare, hash } from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -279,7 +279,7 @@ export class UserService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10; // Number of salt rounds for bcrypt
+    const saltRounds = 10;
     const hashedPassword = await hash(password, saltRounds);
     return hashedPassword;
   }
