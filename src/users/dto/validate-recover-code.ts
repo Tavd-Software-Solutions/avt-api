@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ValidateRecoverCodeDTO {
   @ApiProperty({
     example: 'snvoe',
   })
+  @IsString()
+  @IsNotEmpty()
   recoverCode: string;
 }
 
