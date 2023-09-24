@@ -12,11 +12,6 @@ import { TagsService } from './services/tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  CreatedEntity,
-  DeletedEntity,
-  UpdatedEntity,
-} from 'src/common/dto/default-responses';
 import { Tag } from '@prisma/client';
 
 @ApiTags('tags')
@@ -25,8 +20,8 @@ export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
 
   @Post('create')
-  @ApiResponse({ status: 201, type: CreatedEntity })
-  create(@Body() createTagDto: CreateTagDto): Promise<CreatedEntity> {
+  @ApiResponse({ status: 201 })
+  create(@Body() createTagDto: CreateTagDto): Promise<any> {
     return this.tagsService.create(createTagDto);
   }
 
@@ -43,20 +38,17 @@ export class TagsController {
   }
 
   @Put('edit/:id')
-  @ApiResponse({ status: 200, type: UpdatedEntity })
+  @ApiResponse({ status: 200 })
   update(
     @Param('id') id: string,
     @Body() updateTagDto: UpdateTagDto,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     return this.tagsService.update(id, updateTagDto);
   }
 
   @Delete('delete/:id')
-  @ApiResponse({ status: 200, type: CreatedEntity })
-  remove(
-    @Param('id') id: string,
-    @Request() request: any,
-  ): Promise<DeletedEntity> {
+  @ApiResponse({ status: 200 })
+  remove(@Param('id') id: string, @Request() request: any): Promise<any> {
     return this.tagsService.softDelete(id, request);
   }
 }

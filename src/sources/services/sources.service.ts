@@ -1,7 +1,6 @@
 import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { CreateSourceDto } from '../dto/create-source.dto';
 import { UpdateSourceDto } from '../dto/update-source.dto';
-import { DeletedEntity, UpdatedEntity } from 'src/common/dto/default-responses';
 import {
   convertToken,
   handleErrors,
@@ -80,10 +79,7 @@ export class SourcesService {
     }
   }
 
-  async update(
-    id: string,
-    updateSourceDto: UpdateSourceDto,
-  ): Promise<UpdatedEntity> {
+  async update(id: string, updateSourceDto: UpdateSourceDto): Promise<any> {
     try {
       const source = await this.prisma.source.findUnique({
         where: {
@@ -110,7 +106,7 @@ export class SourcesService {
     }
   }
 
-  async softDelete(id: string, context: any): Promise<DeletedEntity> {
+  async softDelete(id: string, context: any): Promise<any> {
     try {
       const userId = convertToken(context);
 

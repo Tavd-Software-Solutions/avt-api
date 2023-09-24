@@ -14,11 +14,6 @@ import { UpdateRevenueDto } from './dto/update-revenue.dto';
 import { PageDto, PageOptionsDto, WhereDto } from './dto/page.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
-  CreatedEntity,
-  DeletedEntity,
-  UpdatedEntity,
-} from 'src/common/dto/default-responses';
-import {
   IBarChart,
   IPieChart,
   IStackedChart,
@@ -30,8 +25,8 @@ export class RevenueController {
   constructor(private readonly revenueService: RevenueService) {}
 
   @Post('create')
-  @ApiResponse({ status: 201, type: CreatedEntity })
-  create(@Body() createRevenueDto: CreateRevenueDto): Promise<CreatedEntity> {
+  @ApiResponse({ status: 201 })
+  create(@Body() createRevenueDto: CreateRevenueDto): Promise<any> {
     return this.revenueService.create(createRevenueDto);
   }
 
@@ -78,20 +73,17 @@ export class RevenueController {
   }
 
   @Put('edit/:id')
-  @ApiResponse({ status: 200, type: UpdatedEntity })
+  @ApiResponse({ status: 200 })
   update(
     @Param('id') id: string,
     @Body() updateRevenueDto: UpdateRevenueDto,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     return this.revenueService.update(id, updateRevenueDto);
   }
 
   @Delete('delete/:id')
-  @ApiResponse({ status: 200, type: DeletedEntity })
-  remove(
-    @Param('id') id: string,
-    @Request() request: any,
-  ): Promise<DeletedEntity> {
+  @ApiResponse({ status: 200 })
+  remove(@Param('id') id: string, @Request() request: any): Promise<any> {
     return this.revenueService.softDelete(id, request);
   }
 }

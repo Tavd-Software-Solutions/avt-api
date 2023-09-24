@@ -12,11 +12,6 @@ import { TagsService } from 'src/tags/services/tags.service';
 import { SourcesService } from 'src/sources/services/sources.service';
 import { UserService } from 'src/users/services/users.service';
 import {
-  CreatedEntity,
-  DeletedEntity,
-  UpdatedEntity,
-} from 'src/common/dto/default-responses';
-import {
   IBarChart,
   IPieChart,
   IStackedChart,
@@ -36,7 +31,7 @@ export class RevenueService {
     private tagService: TagsService,
   ) {}
 
-  async create(createRevenueDto: CreateRevenueDto): Promise<CreatedEntity> {
+  async create(createRevenueDto: CreateRevenueDto): Promise<any> {
     const { sourceId, tagId, userId } = createRevenueDto;
 
     const user = await this.userService.findOne(userId);
@@ -133,10 +128,7 @@ export class RevenueService {
     }
   }
 
-  async update(
-    id: string,
-    updateRevenueDto: UpdateRevenueDto,
-  ): Promise<UpdatedEntity> {
+  async update(id: string, updateRevenueDto: UpdateRevenueDto): Promise<any> {
     const { sourceId, tagId } = updateRevenueDto;
 
     try {
@@ -183,7 +175,7 @@ export class RevenueService {
     }
   }
 
-  async softDelete(id: string, context: any): Promise<DeletedEntity> {
+  async softDelete(id: string, context: any): Promise<any> {
     try {
       const userId = convertToken(context);
 

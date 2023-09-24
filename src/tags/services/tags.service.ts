@@ -3,11 +3,6 @@ import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
 import { convertToken, handleErrors } from 'src/common/services/common.service';
 import { UserService } from 'src/users/services/users.service';
-import {
-  CreatedEntity,
-  DeletedEntity,
-  UpdatedEntity,
-} from 'src/common/dto/default-responses';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Tag } from '@prisma/client';
 
@@ -20,7 +15,7 @@ export class TagsService {
     private userService: UserService,
   ) {}
 
-  async create(createTagDto: CreateTagDto): Promise<CreatedEntity> {
+  async create(createTagDto: CreateTagDto): Promise<any> {
     const { name, userId } = createTagDto;
 
     if (name === '' || !name) throw new HttpException('Tag is empty', 404);
@@ -79,7 +74,7 @@ export class TagsService {
     }
   }
 
-  async update(id: string, updateTagDto: UpdateTagDto): Promise<UpdatedEntity> {
+  async update(id: string, updateTagDto: UpdateTagDto): Promise<any> {
     try {
       const { name } = updateTagDto;
 
@@ -108,7 +103,7 @@ export class TagsService {
     }
   }
 
-  async softDelete(id: string, context: any): Promise<DeletedEntity> {
+  async softDelete(id: string, context: any): Promise<any> {
     try {
       const userId = convertToken(context);
 

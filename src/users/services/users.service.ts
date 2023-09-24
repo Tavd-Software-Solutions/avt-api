@@ -1,7 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto, UpdateUserResponse } from '../dto/update-user.dto';
-import { CreatedEntity, DeletedEntity } from 'src/common/dto/default-responses';
 import { convertToken, handleErrors } from 'src/common/services/common.service';
 import { GetUserResponse } from '../dto/get-user.dto';
 import { Resend } from 'resend';
@@ -13,6 +12,7 @@ import {
 } from '../dto/recover-password';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
+import { compare, hash } from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -22,7 +22,7 @@ export class UserService {
 
   private resend = new Resend(process.env.RESEND_SECRET);
 
-  async create(createUserDto: CreateUserDto): Promise<CreatedEntity> {
+  async create(createUserDto: CreateUserDto): Promise<any> {
     try {
       const { password } = createUserDto;
       const hashedPassword = await this.hashPassword(password);
@@ -143,7 +143,7 @@ export class UserService {
     }
   }
 
-  async softDelete(id: string): Promise<DeletedEntity> {
+  async softDelete(id: string): Promise<any> {
     try {
       const user = await this.prisma.user.update({
         where: {
@@ -278,8 +278,8 @@ export class UserService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltLength = 10;
-    const hashedPassword = password;
+    const saltRounds = 10;
+    const hashedPassword = await hash(password, saltRounds);
     return hashedPassword;
   }
 
@@ -287,6 +287,6 @@ export class UserService {
     password: string,
     hashedPassword: string,
   ): Promise<boolean> {
-    return await true;
+    return await compare(password, hashedPassword);
   }
 }
