@@ -1,7 +1,10 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto, UpdateUserResponse } from '../dto/update-user.dto';
-import { convertToken, handleErrors } from 'src/common/services/common.service';
+import {
+  convertToken,
+  handleErrors,
+} from '../../common/services/common.service';
 import { GetUserResponse } from '../dto/get-user.dto';
 import { Resend } from 'resend';
 import { ValidatedUserWithCodeDTO } from '../dto/validate-recover-code';
@@ -10,7 +13,7 @@ import {
   RecoverPasswordDTO,
   RecoverPasswordResponse,
 } from '../dto/recover-password';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
 

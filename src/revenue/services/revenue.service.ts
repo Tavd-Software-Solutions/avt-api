@@ -1,22 +1,25 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateRevenueDto } from '../dto/create-revenue.dto';
 import { UpdateRevenueDto } from '../dto/update-revenue.dto';
-import { convertToken, handleErrors } from 'src/common/services/common.service';
+import {
+  convertToken,
+  handleErrors,
+} from '../../../src/common/services/common.service';
 import {
   PageDto,
   PageMetaDto,
   PageOptionsDto,
   WhereDto,
 } from '../dto/page.dto';
-import { TagsService } from 'src/tags/services/tags.service';
-import { SourcesService } from 'src/sources/services/sources.service';
-import { UserService } from 'src/users/services/users.service';
+import { TagsService } from '../../../src/tags/services/tags.service';
+import { SourcesService } from '../../../src/sources/services/sources.service';
+import { UserService } from '../../../src/users/services/users.service';
 import {
   IBarChart,
   IPieChart,
   IStackedChart,
 } from '../dto/charts-interface.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../../src/prisma/prisma.service';
 import { Revenue, TypeRevenue } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
