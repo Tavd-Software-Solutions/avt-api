@@ -19,11 +19,12 @@ export class AuthService {
 
     try {
       const user = await this.userService.findByLogin(login);
+      const isPasswordEqual = await this.userService.isPasswordsEqual(
+        password,
+        user.password,
+      );
 
-      if (
-        user &&
-        !(await this.userService.isPasswordsEqual(password, user.password))
-      ) {
+      if (user && !isPasswordEqual) {
         throw new UnauthorizedException();
       }
 
