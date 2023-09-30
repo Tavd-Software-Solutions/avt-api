@@ -4,25 +4,27 @@ import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
+import * as uuid from 'uuid';
 
 describe('AuthController', () => {
   let URL: string = '/auth/login';
   const prisma = new PrismaClient();
   let app: INestApplication;
+  const userId = uuid.v4();
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    await createUser(prisma);
+    await createUser(prisma, userId);
 
     app = module.createNestApplication();
     await app.init();
   });
 
   afterAll(async () => {
-    await cleanUsersTable(prisma);
+    await removeTestUser(prisma, userId);
     await app.close();
   });
 
@@ -40,7 +42,7 @@ describe('AuthController', () => {
   });
 });
 
-const createUser = async (prisma: PrismaClient) => {
+const createUser = async (prisma: PrismaClient, userId: string) => {
   const password = await hash('john123', 10);
 
   await prisma.user.upsert({
@@ -49,6 +51,7 @@ const createUser = async (prisma: PrismaClient) => {
     },
     update: {},
     create: {
+      id: userId,
       name: 'John Doe',
       email: 'john_don@default.com',
       password: password,
@@ -59,6 +62,10 @@ const createUser = async (prisma: PrismaClient) => {
   });
 };
 
-const cleanUsersTable = async (prisma: PrismaClient) => {
-  await prisma.user.deleteMany({});
+const removeTestUser = async (prisma: PrismaClient, userId: string) => {
+  await prisma.user.deleteMany({
+    where: {
+      id: userId,
+    },
+  });
 };
