@@ -52,6 +52,7 @@ jobs:
 
       - name: Test
         run: |
+          npx prisma generate --schema ./test/schema-test.prisma
           yarn test:e2e
 
       - name: Prepare .env to deploy
