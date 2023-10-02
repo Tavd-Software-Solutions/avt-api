@@ -71,7 +71,7 @@ jobs:
 
       - name: Test
         run: |
-          npx prisma generate --schema ./test/schema-test.prisma
+          npx prisma generate --schema ./test/prisma/schema-test.prisma
           yarn test:e2e
   deploy:
     runs-on: ubuntu-latest
