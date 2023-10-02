@@ -40,6 +40,25 @@ jobs:
       - name: Build
         run: |
           yarn build
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: ls -la
+
+      - name: Install dependencies
+        run: |
+          npm install -g yarn
+          yarn install
 
       - name: Prepare .env to test
         run: |
@@ -54,6 +73,25 @@ jobs:
         run: |
           npx prisma generate --schema ./test/schema-test.prisma
           yarn test:e2e
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: ls -la
+
+      - name: Install dependencies
+        run: |
+          npm install -g yarn
+          yarn install
 
       - name: Prepare .env to deploy
         run: |
