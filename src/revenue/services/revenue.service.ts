@@ -19,9 +19,15 @@ import {
   IPieChart,
   IStackedChart,
 } from '../dto/charts-interface.dto';
+<<<<<<< Updated upstream
 import { PrismaService } from '../../../src/prisma/prisma.service';
 import { Revenue, TypeRevenue } from '@prisma/client';
+=======
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Revenue } from '@prisma/client';
+>>>>>>> Stashed changes
 import { Decimal } from '@prisma/client/runtime/library';
+import { TypeRevenue } from '../enums/enum';
 
 @Injectable()
 export class RevenueService {
@@ -57,9 +63,9 @@ export class RevenueService {
           value: createRevenueDto.value,
           sourceId: sourceId,
           tagId: tagId,
-          payMethod: createRevenueDto.payMethod,
+          payMethod: createRevenueDto.payMethod.toString(),
+          typeRevenue: createRevenueDto.typeRevenue.toString(),
           description: createRevenueDto.description,
-          typeRevenue: createRevenueDto.typeRevenue,
           userId: userId,
           date: new Date(createRevenueDto.date),
         },
@@ -85,7 +91,15 @@ export class RevenueService {
 
       const revenues = await this.prisma.revenue.findMany({
         where: {
-          ...where,
+          name: where.name,
+          value: where.value,
+          tagId: where.tagId,
+          payMethod: where.payMethod.toString(),
+          typeRevenue: where.typeRevenue.toString(),
+          date: {
+            gte: where.startDate,
+            lte: where.endDate,
+          },
           AND: {
             userId,
           },
@@ -160,10 +174,10 @@ export class RevenueService {
           name: updateRevenueDto.name,
           coin: updateRevenueDto.coin,
           value: new Decimal(updateRevenueDto.value),
-          payMethod: updateRevenueDto.payMethod,
           date: updateRevenueDto.date,
           description: updateRevenueDto.description,
-          typeRevenue: updateRevenueDto.typeRevenue,
+          payMethod: updateRevenueDto.payMethod.toString(),
+          typeRevenue: updateRevenueDto.typeRevenue.toString(),
           sourceId: source.id,
           tagId: tag.id,
           updatedAt: new Date(),
@@ -223,10 +237,10 @@ export class RevenueService {
 
       const amount = revenues.reduce((amount: number, entity: Revenue) => {
         let value = 0;
-        if (entity.typeRevenue === TypeRevenue.EXPENSE) {
+        if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
           value = amount - Number(entity.value);
         }
-        if (entity.typeRevenue === TypeRevenue.INCOMING) {
+        if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
           value = amount + Number(entity.value);
         }
         return value;
@@ -251,7 +265,7 @@ export class RevenueService {
 
       const totalExpenses = revenues.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
             return total + Number(entity.value);
           }
           return total;
@@ -261,7 +275,7 @@ export class RevenueService {
 
       const totalIncomings = revenues.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
             return total + Number(entity.value);
           }
           return total;
@@ -313,7 +327,7 @@ export class RevenueService {
       );
       const listExpenses = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -323,7 +337,7 @@ export class RevenueService {
 
       const listIncomings = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -350,7 +364,15 @@ export class RevenueService {
 
       const revenues = await this.prisma.revenue.findMany({
         where: {
-          ...where,
+          name: where.name,
+          value: where.value,
+          tagId: where.tagId,
+          payMethod: where.payMethod.toString(),
+          typeRevenue: where.typeRevenue.toString(),
+          date: {
+            gte: where.startDate,
+            lte: where.endDate,
+          },
           userId,
           deletedAt: null,
         },
@@ -370,10 +392,10 @@ export class RevenueService {
 
       const listRevenues = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
             accumulator.push(Number(entity.value) * -1);
           }
-          if (entity.typeRevenue === TypeRevenue.INCOMING) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
