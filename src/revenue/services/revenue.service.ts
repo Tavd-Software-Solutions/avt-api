@@ -19,13 +19,8 @@ import {
   IPieChart,
   IStackedChart,
 } from '../dto/charts-interface.dto';
-<<<<<<< Updated upstream
 import { PrismaService } from '../../../src/prisma/prisma.service';
-import { Revenue, TypeRevenue } from '@prisma/client';
-=======
-import { PrismaService } from 'src/prisma/prisma.service';
 import { Revenue } from '@prisma/client';
->>>>>>> Stashed changes
 import { Decimal } from '@prisma/client/runtime/library';
 import { TypeRevenue } from '../enums/enum';
 
