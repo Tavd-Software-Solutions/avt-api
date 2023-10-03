@@ -61,11 +61,4 @@ export class CreateRevenueDto {
   @IsEnum(TypeRevenue)
   @IsNotEmpty()
   typeRevenue: TypeRevenue;
-
-  @ApiProperty({
-    example: 'b4d02f14-2cf9-4ce1-9fa7-c94b07cd9e75',
-  })
-  @IsString()
-  @IsNotEmpty()
-  userId: string;
 }

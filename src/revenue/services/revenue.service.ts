@@ -35,18 +35,22 @@ export class RevenueService {
     private tagService: TagsService,
   ) {}
 
-  async create(createRevenueDto: CreateRevenueDto): Promise<any> {
-    const { sourceId, tagId, userId } = createRevenueDto;
+  async create(
+    createRevenueDto: CreateRevenueDto,
+    context: any,
+  ): Promise<CreatedEntity> {
+    const { sourceId, tagId } = createRevenueDto;
+    const userId = convertToken(context);
 
     const user = await this.userService.findOne(userId);
 
     if (!user) throw new HttpException('user_not_found', 404);
 
-    const source = await this.sourceService.findOne(sourceId);
+    const source = await this.sourceService.findOne(sourceId, context);
 
     if (!source) throw new HttpException('source_not_found', 404);
 
-    const tag = await this.tagService.findOne(tagId);
+    const tag = await this.tagService.findOne(tagId, context);
 
     if (!tag) throw new HttpException('tag_not_found', 404);
 
@@ -119,11 +123,13 @@ export class RevenueService {
     }
   }
 
-  async findOne(id: string): Promise<Revenue> {
+  async findOne(id: string, context: any): Promise<Revenue> {
     try {
+      const userId = convertToken(context);
       const revenue = await this.prisma.revenue.findUnique({
         where: {
           id,
+          userId,
           deletedAt: null,
         },
         include: {
@@ -140,30 +146,36 @@ export class RevenueService {
     }
   }
 
-  async update(id: string, updateRevenueDto: UpdateRevenueDto): Promise<any> {
+  async update(
+    id: string,
+    updateRevenueDto: UpdateRevenueDto,
+    context: any,
+  ): Promise<UpdatedEntity> {
     const { sourceId, tagId } = updateRevenueDto;
-
+    const userId = convertToken(context);
     try {
       const revenue = await this.prisma.revenue.findUnique({
         where: {
           id,
+          userId,
           deletedAt: null,
         },
       });
 
       if (!revenue) throw new HttpException('Revenue not found', 404);
 
-      const source = await this.sourceService.findOne(sourceId);
+      const source = await this.sourceService.findOne(sourceId, context);
 
       if (!source) throw new HttpException('source_not_found', 404);
 
-      const tag = await this.tagService.findOne(tagId);
+      const tag = await this.tagService.findOne(tagId, context);
 
       if (!tag) throw new HttpException('tag_not_found', 404);
 
       await this.prisma.revenue.update({
         where: {
           id,
+          userId,
         },
         data: {
           name: updateRevenueDto.name,
