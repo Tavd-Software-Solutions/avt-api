@@ -99,7 +99,6 @@ jobs:
 
       - name: Prepare .env to deploy
         run: |
-          rm .env
           touch .env
           echo PORT=3030 >> .env
           echo SECRET=GSJFDHG827FSDBNGLKWY0R982423TKJGHWS98R7-254 >> .env
