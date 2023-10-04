@@ -67,7 +67,7 @@ jobs:
           echo SECRET=GSJFDHG827FSDBNGLKWY0R982423TKJGHWS98R7-254 >> .env
           echo DATABASE_URL="file:./dev.sqlite" >> .env
           echo APP_ENV=dev >> .env
-          echo RESEND_SECRET=--token=${{ secrets.RESEND_TOKEN }} >> .env
+          echo RESEND_SECRET=${{ secrets.RESEND_TOKEN }} >> .env
 
       - name: Prepare Prisma to test
         run: |
@@ -102,9 +102,9 @@ jobs:
           touch .env
           echo PORT=3030 >> .env
           echo SECRET=GSJFDHG827FSDBNGLKWY0R982423TKJGHWS98R7-254 >> .env
-          echo DATABASE_URL=--token=${{ secrets.DATABASE_URL }} >> .env
+          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
           echo APP_ENV=prod >> .env
-          echo RESEND_SECRET=--token=${{ secrets.RESEND_TOKEN }} >> .env
+          echo RESEND_SECRET=${{ secrets.RESEND_TOKEN }} >> .env
 
       - name: Prepare Prisma to prod
         run: |
