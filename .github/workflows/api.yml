@@ -109,7 +109,7 @@ jobs:
       - name: Prepare Prisma to prod
         run: |
           npx prisma generate --schema ./prisma/schema.prisma 
-          npx prisma migrate --schema ./prisma/schema.prisma deploy
+          npx prisma migrate deploy --schema ./prisma/schema.prisma
 
       - name: Deploy to Vercel
         run: |
