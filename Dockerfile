@@ -8,6 +8,8 @@ RUN yarn install
 
 COPY . .
 
+RUN npx prisma generate --schema ./prisma/schema.prisma
+
 RUN yarn build
 
 CMD [ "yarn", "start:prod" ]
