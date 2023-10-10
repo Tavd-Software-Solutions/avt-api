@@ -51,6 +51,12 @@ $ yarn start:dev
 
 ## Database
 
+Criar os tipes
+
+```bash
+$ npx prisma generate --schema ./prisma/schema.prisma
+```
+
 Acessar o banco via navegador
 
 ```bash
