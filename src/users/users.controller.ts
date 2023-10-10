@@ -11,7 +11,7 @@ import {
 import { UserService } from './services/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto, UpdateUserResponse } from './dto/update-user.dto';
-import { Public } from 'src/auth/decorators/auth.decorators';
+import { Public } from '../../src/auth/decorators/auth.decorators';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetUserResponse } from './dto/get-user.dto';
 import { GetRecoverCodeDTO } from './dto/get-recover-code.dto';

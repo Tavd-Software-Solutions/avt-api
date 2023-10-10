@@ -1,9 +1,12 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateTagDto } from '../dto/create-tag.dto';
 import { UpdateTagDto } from '../dto/update-tag.dto';
-import { convertToken, handleErrors } from 'src/common/services/common.service';
-import { UserService } from 'src/users/services/users.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import {
+  convertToken,
+  handleErrors,
+} from '../../../src/common/services/common.service';
+import { UserService } from '../../../src/users/services/users.service';
+import { PrismaService } from '../../../src/prisma/prisma.service';
 import { Tag } from '@prisma/client';
 
 @Injectable()

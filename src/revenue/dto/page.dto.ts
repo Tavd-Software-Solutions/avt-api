@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PayMethod, TypeRevenue } from '@prisma/client';
+import { PayMethod, TypeRevenue } from '../enums/enum';
 
 enum Order {
   ASC = 'asc',

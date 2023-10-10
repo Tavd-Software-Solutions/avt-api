@@ -54,7 +54,7 @@ $ yarn start:dev
 Acessar o banco via navegador
 
 ```bash
-$ prisma studio
+$ npx prisma studio
 ```
 
 Criar migration

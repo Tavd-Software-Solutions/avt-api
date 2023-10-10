@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthDto, AuthResponse } from '../dto/auth.dto';
-import { UserService } from 'src/users/services/users.service';
+import { UserService } from '../../../src/users/services/users.service';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -19,11 +19,12 @@ export class AuthService {
 
     try {
       const user = await this.userService.findByLogin(login);
+      const isPasswordEqual = await this.userService.isPasswordsEqual(
+        password,
+        user.password,
+      );
 
-      if (
-        user &&
-        !(await this.userService.isPasswordsEqual(password, user.password))
-      ) {
+      if (user && !isPasswordEqual) {
         throw new UnauthorizedException();
       }
 

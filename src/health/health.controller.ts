@@ -4,7 +4,7 @@ import {
   HttpHealthIndicator,
   HealthCheck,
 } from '@nestjs/terminus';
-import { Public } from 'src/auth/decorators/auth.decorators';
+import { Public } from '../../src/auth/decorators/auth.decorators';
 
 @Controller('health')
 export class HealthController {

@@ -5,8 +5,8 @@ import {
   convertToken,
   handleErrors,
 } from '../../common/services/common.service';
-import { UserService } from 'src/users/services/users.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { UserService } from '../../../src/users/services/users.service';
+import { PrismaService } from '../../../src/prisma/prisma.service';
 import { Source } from '@prisma/client';
 
 @Injectable()
