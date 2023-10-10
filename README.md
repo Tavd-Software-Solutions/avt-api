@@ -51,7 +51,7 @@ $ yarn start:dev
 
 ## Database
 
-Criar os tipes
+Criar os tipos do prisma para o app
 
 ```bash
 $ npx prisma generate --schema ./prisma/schema.prisma
