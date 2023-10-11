@@ -66,13 +66,13 @@ $ npx prisma migrate dev
 Atualizar o schema do Prisma com base no banco de dados
 
 ```bash
-$ prisma db pull
+$ npx prisma db pull
 ```
 
 Enviar o schema do Prisma para o banco de dados
 
 ```bash
-$ prisma db push
+$ npx prisma db push
 ```
 
 ## Docker
