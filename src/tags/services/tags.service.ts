@@ -18,10 +18,7 @@ export class TagsService {
     private userService: UserService,
   ) {}
 
-  async create(
-    createTagDto: CreateTagDto,
-    context: any,
-  ): Promise<CreatedEntity> {
+  async create(createTagDto: CreateTagDto, context: any): Promise<any> {
     const { name } = createTagDto;
     const userId = convertToken(context);
     if (name === '' || !name) throw new HttpException('Tag is empty', 404);
@@ -86,7 +83,7 @@ export class TagsService {
     id: string,
     updateTagDto: UpdateTagDto,
     context: any,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     try {
       const { name } = updateTagDto;
       const userId = convertToken(context);

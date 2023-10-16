@@ -43,16 +43,13 @@ export class SourcesController {
     @Param('id') id: string,
     @Body() updateSourceDto: UpdateSourceDto,
     @Request() request: any,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     return this.sourcesService.update(id, updateSourceDto, request);
   }
 
   @Delete('delete/:id')
   @ApiResponse({ status: 200 })
-  remove(
-    @Param('id') id: string,
-    @Request() request: any,
-  ): Promise<any> {
+  remove(@Param('id') id: string, @Request() request: any): Promise<any> {
     return this.sourcesService.softDelete(id, request);
   }
 }

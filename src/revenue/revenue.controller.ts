@@ -25,11 +25,11 @@ export class RevenueController {
   constructor(private readonly revenueService: RevenueService) {}
 
   @Post('create')
-  @ApiResponse({ status: 201, type: CreatedEntity })
+  @ApiResponse({ status: 201 })
   create(
     @Body() createRevenueDto: CreateRevenueDto,
     @Request() request: any,
-  ): Promise<CreatedEntity> {
+  ): Promise<any> {
     return this.revenueService.create(createRevenueDto, request);
   }
 
@@ -81,7 +81,7 @@ export class RevenueController {
     @Param('id') id: string,
     @Body() updateRevenueDto: UpdateRevenueDto,
     @Request() request: any,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     return this.revenueService.update(id, updateRevenueDto, request);
   }
 

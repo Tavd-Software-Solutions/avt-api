@@ -20,11 +20,11 @@ export class TagsController {
   constructor(private readonly tagsService: TagsService) {}
 
   @Post('create')
-  @ApiResponse({ status: 201, type: CreatedEntity })
+  @ApiResponse({ status: 201 })
   create(
     @Body() createTagDto: CreateTagDto,
     @Request() request: any,
-  ): Promise<CreatedEntity> {
+  ): Promise<any> {
     return this.tagsService.create(createTagDto, request);
   }
 
@@ -46,7 +46,7 @@ export class TagsController {
     @Param('id') id: string,
     @Body() updateTagDto: UpdateTagDto,
     @Request() request: any,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     return this.tagsService.update(id, updateTagDto, request);
   }
 

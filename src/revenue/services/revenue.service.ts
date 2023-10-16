@@ -35,10 +35,7 @@ export class RevenueService {
     private tagService: TagsService,
   ) {}
 
-  async create(
-    createRevenueDto: CreateRevenueDto,
-    context: any,
-  ): Promise<CreatedEntity> {
+  async create(createRevenueDto: CreateRevenueDto, context: any): Promise<any> {
     const { sourceId, tagId } = createRevenueDto;
     const userId = convertToken(context);
 
@@ -150,7 +147,7 @@ export class RevenueService {
     id: string,
     updateRevenueDto: UpdateRevenueDto,
     context: any,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     const { sourceId, tagId } = updateRevenueDto;
     const userId = convertToken(context);
     try {

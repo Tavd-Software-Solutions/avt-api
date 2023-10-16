@@ -85,7 +85,7 @@ export class SourcesService {
     id: string,
     updateSourceDto: UpdateSourceDto,
     context: any,
-  ): Promise<UpdatedEntity> {
+  ): Promise<any> {
     try {
       const userId = convertToken(context);
       const source = await this.prisma.source.findUnique({
