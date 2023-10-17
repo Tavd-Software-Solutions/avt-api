@@ -11,9 +11,9 @@ enum Order {
 export interface WhereDto {
   name?: string;
   value?: number;
-  tagId?: string;
-  payMethod?: PayMethod;
-  typeRevenue?: TypeRevenue;
+  tagId?: string[];
+  payMethod?: PayMethod[];
+  typeRevenue?: TypeRevenue[];
   startDate?: Date;
   endDate?: Date;
 }

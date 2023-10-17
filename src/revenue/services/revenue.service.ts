@@ -59,8 +59,8 @@ export class RevenueService {
           value: createRevenueDto.value,
           sourceId: sourceId,
           tagId: tagId,
-          payMethod: createRevenueDto.payMethod.toString(),
-          typeRevenue: createRevenueDto.typeRevenue.toString(),
+          payMethod: createRevenueDto.payMethod,
+          typeRevenue: createRevenueDto.typeRevenue,
           description: createRevenueDto.description,
           userId: userId,
           date: new Date(createRevenueDto.date),
@@ -89,9 +89,9 @@ export class RevenueService {
         where: {
           name: where.name,
           value: where.value,
-          tagId: where.tagId,
-          payMethod: where.payMethod.toString(),
-          typeRevenue: where.typeRevenue.toString(),
+          // tagId: where.tagId,
+          // payMethod: where.payMethod,
+          // typeRevenue: where.typeRevenue,
           date: {
             gte: where.startDate,
             lte: where.endDate,
@@ -180,8 +180,8 @@ export class RevenueService {
           value: new Decimal(updateRevenueDto.value),
           date: updateRevenueDto.date,
           description: updateRevenueDto.description,
-          payMethod: updateRevenueDto.payMethod.toString(),
-          typeRevenue: updateRevenueDto.typeRevenue.toString(),
+          payMethod: updateRevenueDto.payMethod,
+          typeRevenue: updateRevenueDto.typeRevenue,
           sourceId: source.id,
           tagId: tag.id,
           updatedAt: new Date(),
@@ -241,10 +241,10 @@ export class RevenueService {
 
       const amount = revenues.reduce((amount: number, entity: Revenue) => {
         let value = 0;
-        if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
+        if (entity.typeRevenue === TypeRevenue.EXPENSE) {
           value = amount - Number(entity.value);
         }
-        if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
+        if (entity.typeRevenue === TypeRevenue.INCOMING) {
           value = amount + Number(entity.value);
         }
         return value;
@@ -269,7 +269,7 @@ export class RevenueService {
 
       const totalExpenses = revenues.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             return total + Number(entity.value);
           }
           return total;
@@ -279,7 +279,7 @@ export class RevenueService {
 
       const totalIncomings = revenues.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             return total + Number(entity.value);
           }
           return total;
@@ -331,7 +331,7 @@ export class RevenueService {
       );
       const listExpenses = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -341,7 +341,7 @@ export class RevenueService {
 
       const listIncomings = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -370,9 +370,9 @@ export class RevenueService {
         where: {
           name: where.name,
           value: where.value,
-          tagId: where.tagId,
-          payMethod: where.payMethod.toString(),
-          typeRevenue: where.typeRevenue.toString(),
+          // tagId: where.tagId,
+          // payMethod: where.payMethod,
+          // typeRevenue: where.typeRevenue,
           date: {
             gte: where.startDate,
             lte: where.endDate,
@@ -396,10 +396,10 @@ export class RevenueService {
 
       const listRevenues = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             accumulator.push(Number(entity.value) * -1);
           }
-          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;

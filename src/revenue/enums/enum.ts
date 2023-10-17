@@ -1,11 +1,11 @@
 export enum PayMethod {
-  PIX,
-  CREDITCARD,
-  DEBITCARD,
-  MONEY,
+  PIX = "PIX",
+  CREDITCARD = "CREDITCARD",
+  DEBITCARD = "DEBITCARD",
+  MONEY = "MONEY",
 }
 
 export enum TypeRevenue {
-  EXPENSE,
-  INCOMING,
+  EXPENSE = "EXPENSE",
+  INCOMING = "INCOMING",
 }
