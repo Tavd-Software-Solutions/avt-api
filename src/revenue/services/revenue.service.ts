@@ -84,7 +84,7 @@ export class RevenueService {
     try {
       const { order, skip, take, where } = pageOptionsDto;
       const userId = convertToken(context);
-      const filter = this.getFilter(where, userId);
+      const filter = this.getFilter(where, userId, true);
 
       const revenues = await this.prisma.revenue.findMany({
         where: filter,
