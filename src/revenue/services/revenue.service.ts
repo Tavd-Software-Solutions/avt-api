@@ -87,7 +87,7 @@ export class RevenueService {
       const filter = this.getFilter(where, userId);
 
       const revenues = await this.prisma.revenue.findMany({
-        where: { ...filter, deletedAt: null },
+        where: { ...filter, userId, deletedAt: null },
         skip,
         take,
         include: {
@@ -351,7 +351,6 @@ export class RevenueService {
     context: any,
   ): Promise<IBarChart> {
     try {
-      
       const userId = convertToken(context);
 
       const where = this.getFilter(pageOptionsDto, userId);
@@ -399,42 +398,52 @@ export class RevenueService {
 
   private getFilter(options: WhereDto, userId = null, deteleted = false) {
     const where: Prisma.RevenueWhereInput = {};
-      // Loop sobre as chaves da WhereDto
-      Object.keys(options).forEach((key) => {
-        const value = options[key];
+    // Loop sobre as chaves da WhereDto
+    Object.keys(options).forEach((key) => {
+      const value = options[key];
 
-        if (value !== undefined && value !== null && key === 'value') {
-          where[key] = { equals: value };
-        }
-        // Se o valor existir e não for uma data, aplique o filtro
-        if (value !== undefined && value !== "" && value !== null && !Array.isArray(value) && key !== 'startDate' && key !== 'endDate') {
-          if (key === 'name') return where[key] =  { contains: value } ;
-          where[key] = value;
-        }
+      if (value !== undefined && value !== null && key === 'value') {
+        where[key] = { equals: value };
+      }
+      // Se o valor existir e não for uma data, aplique o filtro
+      if (
+        value !== undefined &&
+        value !== '' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        key !== 'startDate' &&
+        key !== 'endDate'
+      ) {
+        if (key === 'name') return (where[key] = { contains: value });
+        where[key] = value;
+      }
 
-        // Se o valor for uma data, use gte/lte para intervalo de datas
-        if (value !== undefined && value !== null && (key === 'startDate' || key === 'endDate')) {
-          where['createdAt'] = {
-            [key === 'startDate' ? 'gte' : 'lte']: value,
-          };
-        }
+      // Se o valor for uma data, use gte/lte para intervalo de datas
+      if (
+        value !== undefined &&
+        value !== null &&
+        (key === 'startDate' || key === 'endDate')
+      ) {
+        where['createdAt'] = {
+          [key === 'startDate' ? 'gte' : 'lte']: value,
+        };
+      }
 
-        // Se o valor for uma matriz (como tagId), use 'in'
-        if (Array.isArray(value) && value.length > 0) {
-          where[key] = { in: value };
-        }
+      // Se o valor for uma matriz (como tagId), use 'in'
+      if (Array.isArray(value) && value.length > 0) {
+        where[key] = { in: value };
+      }
 
-        if (userId) {
-          where["userId"] = userId;
-        }
+      if (userId) {
+        where['userId'] = userId;
+      }
 
-        if (deteleted) {
-          where["deletedAt"] = null;
-        }
+      if (deteleted) {
+        where['deletedAt'] = null;
+      }
+    });
 
-      });
-
-      return where;
+    return where;
   }
 
   private formatDate(date: Date): string {
