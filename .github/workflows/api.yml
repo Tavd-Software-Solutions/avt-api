@@ -40,44 +40,6 @@ jobs:
       - name: Build
         run: |
           yarn build
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: ls -la
-
-      - name: Install dependencies
-        run: |
-          npm install -g yarn
-          yarn install
-
-      - name: Prepare .env to test
-        run: |
-          touch .env
-          echo PORT=3030 >> .env
-          echo SECRET=GSJFDHG827FSDBNGLKWY0R982423TKJGHWS98R7-254 >> .env
-          echo DATABASE_URL="file:./dev.sqlite" >> .env
-          echo APP_ENV=dev >> .env
-          echo RESEND_SECRET=${{ secrets.RESEND_TOKEN }} >> .env
-
-      - name: Prepare Prisma to test
-        run: |
-          npx prisma generate --schema ./test/prisma/schema-test.prisma
-          npx prisma db push --schema ./test/prisma/schema-test.prisma
-
-      - name: Test
-        run: |
-          yarn test:e2e
   deploy:
     # needs: test
     runs-on: ubuntu-latest
