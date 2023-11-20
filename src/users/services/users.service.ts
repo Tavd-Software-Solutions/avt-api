@@ -23,7 +23,7 @@ export class UserService {
 
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  private resend = new Resend(process.env.RESEND_SECRET);
+  private resend = new Resend("re_7dAqg21i_DS6dKxG4bvqAnRHP3mD43G9z");
 
   async create(createUserDto: CreateUserDto): Promise<any> {
     try {
@@ -232,7 +232,7 @@ export class UserService {
 
     return {
       access_token: await this.jwtService.signAsync(payload, {
-        secret: process.env.SECRET,
+        secret: "GSJFDHG827FSDBNGLKWY0R982423TKJGHWS98R7-254",
       }),
     };
   }

@@ -5,8 +5,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const logger = new Logger();
-  const PORT = process.env.PORT;
-  const APP_ENV = process.env.APP_ENV;
+  const PORT = "3030";
+  const APP_ENV = "dev";
 
   const app = await NestFactory.create(AppModule, {
     logger:
