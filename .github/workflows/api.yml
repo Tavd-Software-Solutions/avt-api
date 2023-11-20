@@ -122,7 +122,7 @@ jobs:
         run: aws ecr get-login-password --region us-east-1 | docker login --username ${{ secrets.AWS_USER }} --password-stdin ${{ secrets.AWS_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t avt-api ./api
+        run: docker build -t avt-api .
 
       - name: Version Docker image
         run: docker tag avt-api:latest ${{ secrets.AWS_REPOSITORY }}/avt-api:latest
