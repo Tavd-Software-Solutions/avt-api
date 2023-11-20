@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "a3a0f6c9e1fd04b3a93c9087f52ef84c-708976793.us-east-1.elb.amazonaws.com"
+  url      = "postgresql://postgres:postgres@a9d27116c68624d1f94301caddcca7d9-3542398.us-east-1.elb.amazonaws.com:5432/avt_db?schema=public"
 }
 
 model User {
