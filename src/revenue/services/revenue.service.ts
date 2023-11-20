@@ -20,7 +20,7 @@ import {
   IStackedChart,
 } from '../dto/charts-interface.dto';
 import { PrismaService } from '../../../src/prisma/prisma.service';
-import { Revenue } from '@prisma/client';
+import { Prisma, Revenue } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { TypeRevenue } from '../enums/enum';
 
@@ -35,18 +35,19 @@ export class RevenueService {
     private tagService: TagsService,
   ) {}
 
-  async create(createRevenueDto: CreateRevenueDto): Promise<any> {
-    const { sourceId, tagId, userId } = createRevenueDto;
+  async create(createRevenueDto: CreateRevenueDto, context: any): Promise<any> {
+    const { sourceId, tagId } = createRevenueDto;
+    const userId = convertToken(context);
 
     const user = await this.userService.findOne(userId);
 
     if (!user) throw new HttpException('user_not_found', 404);
 
-    const source = await this.sourceService.findOne(sourceId);
+    const source = await this.sourceService.findOne(sourceId, context);
 
     if (!source) throw new HttpException('source_not_found', 404);
 
-    const tag = await this.tagService.findOne(tagId);
+    const tag = await this.tagService.findOne(tagId, context);
 
     if (!tag) throw new HttpException('tag_not_found', 404);
 
@@ -58,8 +59,8 @@ export class RevenueService {
           value: createRevenueDto.value,
           sourceId: sourceId,
           tagId: tagId,
-          payMethod: createRevenueDto.payMethod.toString(),
-          typeRevenue: createRevenueDto.typeRevenue.toString(),
+          payMethod: createRevenueDto.payMethod,
+          typeRevenue: createRevenueDto.typeRevenue,
           description: createRevenueDto.description,
           userId: userId,
           date: new Date(createRevenueDto.date),
@@ -83,22 +84,10 @@ export class RevenueService {
     try {
       const { order, skip, take, where } = pageOptionsDto;
       const userId = convertToken(context);
+      const filter = this.getFilter(where, userId);
 
       const revenues = await this.prisma.revenue.findMany({
-        where: {
-          name: where.name,
-          value: where.value,
-          tagId: where.tagId,
-          payMethod: where.payMethod.toString(),
-          typeRevenue: where.typeRevenue.toString(),
-          date: {
-            gte: where.startDate,
-            lte: where.endDate,
-          },
-          AND: {
-            userId,
-          },
-        },
+        where: { ...filter, userId, deletedAt: null },
         skip,
         take,
         include: {
@@ -119,11 +108,13 @@ export class RevenueService {
     }
   }
 
-  async findOne(id: string): Promise<Revenue> {
+  async findOne(id: string, context: any): Promise<Revenue> {
     try {
+      const userId = convertToken(context);
       const revenue = await this.prisma.revenue.findUnique({
         where: {
           id,
+          userId,
           deletedAt: null,
         },
         include: {
@@ -140,30 +131,36 @@ export class RevenueService {
     }
   }
 
-  async update(id: string, updateRevenueDto: UpdateRevenueDto): Promise<any> {
+  async update(
+    id: string,
+    updateRevenueDto: UpdateRevenueDto,
+    context: any,
+  ): Promise<any> {
     const { sourceId, tagId } = updateRevenueDto;
-
+    const userId = convertToken(context);
     try {
       const revenue = await this.prisma.revenue.findUnique({
         where: {
           id,
+          userId,
           deletedAt: null,
         },
       });
 
       if (!revenue) throw new HttpException('Revenue not found', 404);
 
-      const source = await this.sourceService.findOne(sourceId);
+      const source = await this.sourceService.findOne(sourceId, context);
 
       if (!source) throw new HttpException('source_not_found', 404);
 
-      const tag = await this.tagService.findOne(tagId);
+      const tag = await this.tagService.findOne(tagId, context);
 
       if (!tag) throw new HttpException('tag_not_found', 404);
 
       await this.prisma.revenue.update({
         where: {
           id,
+          userId,
         },
         data: {
           name: updateRevenueDto.name,
@@ -171,8 +168,8 @@ export class RevenueService {
           value: new Decimal(updateRevenueDto.value),
           date: updateRevenueDto.date,
           description: updateRevenueDto.description,
-          payMethod: updateRevenueDto.payMethod.toString(),
-          typeRevenue: updateRevenueDto.typeRevenue.toString(),
+          payMethod: updateRevenueDto.payMethod,
+          typeRevenue: updateRevenueDto.typeRevenue,
           sourceId: source.id,
           tagId: tag.id,
           updatedAt: new Date(),
@@ -232,10 +229,10 @@ export class RevenueService {
 
       const amount = revenues.reduce((amount: number, entity: Revenue) => {
         let value = 0;
-        if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
+        if (entity.typeRevenue === TypeRevenue.EXPENSE) {
           value = amount - Number(entity.value);
         }
-        if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
+        if (entity.typeRevenue === TypeRevenue.INCOMING) {
           value = amount + Number(entity.value);
         }
         return value;
@@ -260,7 +257,7 @@ export class RevenueService {
 
       const totalExpenses = revenues.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             return total + Number(entity.value);
           }
           return total;
@@ -270,7 +267,7 @@ export class RevenueService {
 
       const totalIncomings = revenues.reduce(
         (total: number, entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             return total + Number(entity.value);
           }
           return total;
@@ -322,7 +319,7 @@ export class RevenueService {
       );
       const listExpenses = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -332,7 +329,7 @@ export class RevenueService {
 
       const listIncomings = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -354,23 +351,12 @@ export class RevenueService {
     context: any,
   ): Promise<IBarChart> {
     try {
-      const where = pageOptionsDto;
       const userId = convertToken(context);
 
+      const where = this.getFilter(pageOptionsDto, userId);
+
       const revenues = await this.prisma.revenue.findMany({
-        where: {
-          name: where.name,
-          value: where.value,
-          tagId: where.tagId,
-          payMethod: where.payMethod.toString(),
-          typeRevenue: where.typeRevenue.toString(),
-          date: {
-            gte: where.startDate,
-            lte: where.endDate,
-          },
-          userId,
-          deletedAt: null,
-        },
+        where,
         orderBy: {
           createdAt: 'asc',
         },
@@ -387,10 +373,10 @@ export class RevenueService {
 
       const listRevenues = revenues.reduce(
         (accumulator: number[], entity: Revenue) => {
-          if (entity.typeRevenue === TypeRevenue.EXPENSE.toString()) {
+          if (entity.typeRevenue === TypeRevenue.EXPENSE) {
             accumulator.push(Number(entity.value) * -1);
           }
-          if (entity.typeRevenue === TypeRevenue.INCOMING.toString()) {
+          if (entity.typeRevenue === TypeRevenue.INCOMING) {
             accumulator.push(Number(entity.value));
           }
           return accumulator;
@@ -410,99 +396,54 @@ export class RevenueService {
    * HELPERS
    */
 
-  private buildWhere(options: WhereDto, deteleted = false) {
-    let whereString = '';
-    const values = {};
+  private getFilter(options: WhereDto, userId = null, deteleted = false) {
+    const where: Prisma.RevenueWhereInput = {};
+    // Loop sobre as chaves da WhereDto
+    Object.keys(options).forEach((key) => {
+      const value = options[key];
 
-    if (options.name && options.name != '') {
-      whereString += `revenue.name like :name`;
+      if (value !== undefined && value !== null && key === 'value') {
+        where[key] = { equals: value };
+      }
+      // Se o valor existir e não for uma data, aplique o filtro
+      if (
+        value !== undefined &&
+        value !== '' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        key !== 'startDate' &&
+        key !== 'endDate'
+      ) {
+        if (key === 'name') return (where[key] = { contains: value });
+        where[key] = value;
+      }
 
-      values['name'] = `%${options.name}%`;
-    }
+      // Se o valor for uma data, use gte/lte para intervalo de datas
+      if (
+        value !== undefined &&
+        value !== null &&
+        (key === 'startDate' || key === 'endDate')
+      ) {
+        where['createdAt'] = {
+          [key === 'startDate' ? 'gte' : 'lte']: value,
+        };
+      }
 
-    if (options.payMethod) {
-      const condition = `revenue.payMethod = :payMethod`;
+      // Se o valor for uma matriz (como tagId), use 'in'
+      if (Array.isArray(value) && value.length > 0) {
+        where[key] = { in: value };
+      }
 
-      whereString.length > 0
-        ? (whereString += ` AND ${condition}`)
-        : (whereString = `${condition}`);
+      if (userId) {
+        where['userId'] = userId;
+      }
 
-      values['payMethod'] = options.payMethod;
-    }
+      if (deteleted) {
+        where['deletedAt'] = null;
+      }
+    });
 
-    if (options.typeRevenue) {
-      const condition = `revenue.typeRevenue = :typeRevenue`;
-
-      whereString.length > 0
-        ? (whereString += ` AND ${condition}`)
-        : (whereString = `${condition}`);
-
-      values['typeRevenue'] = options.typeRevenue;
-    }
-
-    if (options.tagId) {
-      const condition = `revenue.tagId = :tagId`;
-
-      whereString.length > 0
-        ? (whereString += ` AND ${condition}`)
-        : (whereString = `${condition}`);
-
-      values['tagId'] = options.tagId;
-    }
-
-    if (options.value) {
-      const condition = `revenue.value = :value`;
-
-      whereString.length > 0
-        ? (whereString += ` AND ${condition}`)
-        : (whereString = `${condition}`);
-
-      values['value'] = options.value;
-    }
-
-    if (options.startDate && !options.endDate) {
-      const condition = `revenue.date >= :startDate`;
-
-      whereString.length > 0
-        ? (whereString += ` AND ${condition}`)
-        : (whereString = `${condition}`);
-
-      values['startDate'] = options.startDate;
-    }
-
-    if (!options.startDate && options.endDate) {
-      const condition = `revenue.date <= :endDate`;
-
-      whereString.length > 0
-        ? (whereString += ` AND ${condition}`)
-        : (whereString = `${condition}`);
-
-      values['endDate'] = options.endDate;
-    }
-
-    if (options.startDate && options.endDate) {
-      const condition = `revenue.date >= :startDate AND revenue.date <= :endDate`;
-
-      whereString.length > 0
-        ? (whereString += ` AND ${condition}`)
-        : (whereString = `${condition}`);
-
-      values['startDate'] = options.startDate;
-      values['endDate'] = options.endDate;
-    }
-
-    if (!deteleted) {
-      const condition = `revenue.deletedAt is null`;
-
-      whereString.length > 0
-        ? (whereString += ` AND ${condition}`)
-        : (whereString = `${condition}`);
-    }
-
-    return {
-      whereString,
-      values,
-    };
+    return where;
   }
 
   private formatDate(date: Date): string {

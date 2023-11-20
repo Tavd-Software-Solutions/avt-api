@@ -21,8 +21,8 @@ export class SourcesController {
 
   @Post('create')
   @ApiResponse({ status: 201, type: CreateSourceDto })
-  create(@Body() createSourceDto: CreateSourceDto) {
-    return this.sourcesService.create(createSourceDto);
+  create(@Body() createSourceDto: CreateSourceDto, @Request() request: any) {
+    return this.sourcesService.create(createSourceDto, request);
   }
 
   @Get('list-all')
@@ -33,8 +33,8 @@ export class SourcesController {
 
   @Get('get/:id')
   @ApiResponse({ status: 200 })
-  findOne(@Param('id') id: string): Promise<Source> {
-    return this.sourcesService.findOne(id);
+  findOne(@Param('id') id: string, @Request() request: any): Promise<Source> {
+    return this.sourcesService.findOne(id, request);
   }
 
   @Put('edit/:id')
@@ -42,16 +42,14 @@ export class SourcesController {
   update(
     @Param('id') id: string,
     @Body() updateSourceDto: UpdateSourceDto,
+    @Request() request: any,
   ): Promise<any> {
-    return this.sourcesService.update(id, updateSourceDto);
+    return this.sourcesService.update(id, updateSourceDto, request);
   }
 
   @Delete('delete/:id')
   @ApiResponse({ status: 200 })
-  remove(
-    @Param('id') id: string,
-    @Request() request: any,
-  ): Promise<any> {
+  remove(@Param('id') id: string, @Request() request: any): Promise<any> {
     return this.sourcesService.softDelete(id, request);
   }
 }

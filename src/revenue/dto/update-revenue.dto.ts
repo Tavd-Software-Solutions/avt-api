@@ -10,5 +10,4 @@ export class UpdateRevenueDto {
   date: Date;
   description: string;
   typeRevenue: TypeRevenue;
-  userId: string;
 }

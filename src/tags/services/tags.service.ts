@@ -18,14 +18,13 @@ export class TagsService {
     private userService: UserService,
   ) {}
 
-  async create(createTagDto: CreateTagDto): Promise<any> {
-    const { name, userId } = createTagDto;
-
+  async create(createTagDto: CreateTagDto, context: any): Promise<any> {
+    const { name } = createTagDto;
+    const userId = convertToken(context);
     if (name === '' || !name) throw new HttpException('Tag is empty', 404);
     if (userId === '' || !userId) throw new HttpException('User is empty', 404);
 
     try {
-      const { userId } = createTagDto;
       const user = await this.userService.findOne(userId);
 
       if (!user) throw new HttpException('user_not_found', 404);
@@ -51,6 +50,7 @@ export class TagsService {
       const tags = await this.prisma.tag.findMany({
         where: {
           deletedAt: null,
+          userId: userId,
         },
       });
 
@@ -60,11 +60,13 @@ export class TagsService {
     }
   }
 
-  async findOne(id: string): Promise<Tag> {
+  async findOne(id: string, context: any): Promise<Tag> {
     try {
+      const userId = convertToken(context);
       const tag = await this.prisma.tag.findUnique({
         where: {
           id,
+          userId,
           deletedAt: null,
         },
       });
@@ -77,13 +79,19 @@ export class TagsService {
     }
   }
 
-  async update(id: string, updateTagDto: UpdateTagDto): Promise<any> {
+  async update(
+    id: string,
+    updateTagDto: UpdateTagDto,
+    context: any,
+  ): Promise<any> {
     try {
       const { name } = updateTagDto;
+      const userId = convertToken(context);
 
       const tag = await this.prisma.tag.findUnique({
         where: {
           id,
+          userId,
           deletedAt: null,
         },
       });
@@ -93,6 +101,7 @@ export class TagsService {
       await this.prisma.tag.update({
         where: {
           id,
+          userId,
         },
         data: {
           name: updateTagDto.name,

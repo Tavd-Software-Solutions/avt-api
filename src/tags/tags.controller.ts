@@ -21,8 +21,11 @@ export class TagsController {
 
   @Post('create')
   @ApiResponse({ status: 201 })
-  create(@Body() createTagDto: CreateTagDto): Promise<any> {
-    return this.tagsService.create(createTagDto);
+  create(
+    @Body() createTagDto: CreateTagDto,
+    @Request() request: any,
+  ): Promise<any> {
+    return this.tagsService.create(createTagDto, request);
   }
 
   @Get('list-all')
@@ -33,8 +36,8 @@ export class TagsController {
 
   @Get('get/:id')
   @ApiResponse({ status: 200 })
-  findOne(@Param('id') id: string): Promise<Tag> {
-    return this.tagsService.findOne(id);
+  findOne(@Param('id') id: string, @Request() request: any): Promise<Tag> {
+    return this.tagsService.findOne(id, request);
   }
 
   @Put('edit/:id')
@@ -42,8 +45,9 @@ export class TagsController {
   update(
     @Param('id') id: string,
     @Body() updateTagDto: UpdateTagDto,
+    @Request() request: any,
   ): Promise<any> {
-    return this.tagsService.update(id, updateTagDto);
+    return this.tagsService.update(id, updateTagDto, request);
   }
 
   @Delete('delete/:id')

@@ -18,8 +18,9 @@ export class SourcesService {
     private userService: UserService,
   ) {}
 
-  async create(createSourceDto: CreateSourceDto) {
-    const { name, userId } = createSourceDto;
+  async create(createSourceDto: CreateSourceDto, context: any) {
+    const { name } = createSourceDto;
+    const userId = convertToken(context);
 
     if (name === '' || !name) throw new HttpException('Source is empty', 404);
     if (userId === '' || !userId) throw new HttpException('User is empty', 404);
@@ -52,7 +53,6 @@ export class SourcesService {
         where: {
           deletedAt: null,
           userId,
-          OR: [{ deletedAt: null }, { userId: null }],
         },
       });
 
@@ -62,11 +62,13 @@ export class SourcesService {
     }
   }
 
-  async findOne(id: string): Promise<Source> {
+  async findOne(id: string, context: any): Promise<Source> {
     try {
+      const userId = convertToken(context);
       const source = await this.prisma.source.findUnique({
         where: {
           id,
+          userId,
           deletedAt: null,
         },
       });
@@ -79,11 +81,17 @@ export class SourcesService {
     }
   }
 
-  async update(id: string, updateSourceDto: UpdateSourceDto): Promise<any> {
+  async update(
+    id: string,
+    updateSourceDto: UpdateSourceDto,
+    context: any,
+  ): Promise<any> {
     try {
+      const userId = convertToken(context);
       const source = await this.prisma.source.findUnique({
         where: {
           id,
+          userId,
           deletedAt: null,
         },
       });
@@ -93,6 +101,7 @@ export class SourcesService {
       await this.prisma.source.update({
         where: {
           id,
+          userId,
         },
         data: {
           name: updateSourceDto.name,

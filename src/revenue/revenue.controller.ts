@@ -26,8 +26,11 @@ export class RevenueController {
 
   @Post('create')
   @ApiResponse({ status: 201 })
-  create(@Body() createRevenueDto: CreateRevenueDto): Promise<any> {
-    return this.revenueService.create(createRevenueDto);
+  create(
+    @Body() createRevenueDto: CreateRevenueDto,
+    @Request() request: any,
+  ): Promise<any> {
+    return this.revenueService.create(createRevenueDto, request);
   }
 
   @Post('list-all')
@@ -41,8 +44,8 @@ export class RevenueController {
 
   @Get('get/:id')
   @ApiResponse({ status: 200 })
-  findOne(@Param('id') id: string): Promise<Revenue> {
-    return this.revenueService.findOne(id);
+  findOne(@Param('id') id: string, @Request() request: any): Promise<Revenue> {
+    return this.revenueService.findOne(id, request);
   }
 
   @Get('amount')
@@ -77,8 +80,9 @@ export class RevenueController {
   update(
     @Param('id') id: string,
     @Body() updateRevenueDto: UpdateRevenueDto,
+    @Request() request: any,
   ): Promise<any> {
-    return this.revenueService.update(id, updateRevenueDto);
+    return this.revenueService.update(id, updateRevenueDto, request);
   }
 
   @Delete('delete/:id')
