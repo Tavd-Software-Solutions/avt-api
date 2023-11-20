@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "postgresql://postgres:postgres@a853199d54dd4415f8ac34e1a568535a-744180023.us-east-1.elb.amazonaws.com:5432/avt_db?schema=public"
+  url      = "postgresql://postgres:postgres@a9d27116c68624d1f94301caddcca7d9-3542398.us-east-1.elb.amazonaws.com:5432/avt_db?schema=public"
 
 }
 
