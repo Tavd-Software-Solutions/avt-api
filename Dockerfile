@@ -10,7 +10,7 @@ COPY . .
 
 RUN npx prisma generate --schema ./prisma/schema.prisma
 
-RUN npx prisma db push
+# RUN npx prisma db push
 
 RUN yarn build
 
